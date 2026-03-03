@@ -27,6 +27,13 @@ This is an AI-generated art portfolio repo. The user creates graphic novels, ren
 - Use `compose_images` with the same character refs for consistency.
 - Include: title, character hero poses, dramatic background, issue number, tagline.
 
+### CRITICAL: Always Create ALL Reference Sheets BEFORE Generating Pages
+- **This is the #1 rule.** Before generating ANY story pages, create reference sheets for EVERY character (heroes, villains, side characters).
+- Generate refs using `generate_image` (NOT compose), save them in the project folder.
+- Then use ALL refs together in `compose_images` for every page to maintain consistency.
+- If a new character is introduced mid-story (e.g., a villain), STOP and create their reference sheet first before continuing.
+- Each new issue/part should have its own folder (e.g., `graphic_novel_p2/`) with copies of all character refs inside it.
+
 ### Key Learnings & Tips
 1. **2 panels per page works best.** 6-panel pages are too complex and may fail (API returns no image).
 2. **Keep prompts detailed but focused.** Describe each panel clearly with scene, characters, actions, and dialogue.
@@ -36,6 +43,7 @@ This is an AI-generated art portfolio repo. The user creates graphic novels, ren
 6. **Page numbers:** Include "page number 'N' at bottom" in the prompt and they render correctly.
 7. **Image sizes:** Generated images are typically 500KB-1.1MB JPEG files.
 8. **Failed generations:** If `generate_image` fails with "No image data returned," simplify the prompt or break into fewer panels.
+9. **New characters need refs first.** Don't start generating pages with a new character until their reference sheet exists.
 
 ## Folder Structure
 ```
@@ -46,7 +54,7 @@ nano/
 ├── gaming_pc.png                      # Standalone renders
 ├── einstein_newton_chat.png
 ├── einstein_newton_realistic.png
-├── graphic_novel/                     # Graphic novel project
+├── graphic_novel/                     # Issue #1: The Multiverse Equation
 │   ├── index.html                     # HTML reader (dark theme, keyboard nav, fullscreen)
 │   ├── cover.png
 │   ├── ref_einstein.png               # Character reference sheet
@@ -54,8 +62,21 @@ nano/
 │   ├── page1.png
 │   ├── page2.png
 │   └── page3.png
+├── graphic_novel_p2/                  # Issue #2: The Dark Equation
+│   ├── index.html                     # HTML reader for Part 2
+│   ├── cover.png
+│   ├── ref_einstein.png               # Character ref (copied for consistency)
+│   ├── ref_spiderhero.png             # Character ref (copied for consistency)
+│   ├── ref_drvoid.png                 # New villain reference sheet
+│   ├── p2_page1.png - p2_page6.png   # Story pages
+│   └── ...
 └── images/                            # Other images
 ```
+
+### Convention: Each new issue gets its own folder
+- `graphic_novel/` = Issue #1
+- `graphic_novel_p2/` = Issue #2
+- Each folder contains its own character refs, pages, cover, and index.html reader.
 
 ## Git & GitHub Setup
 - GitHub CLI (`gh`) is installed via winget and authenticated as `sebitasaquiles2018-bot`.
