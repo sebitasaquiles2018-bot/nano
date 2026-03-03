@@ -1,0 +1,76 @@
+# Nano Project - Session Learnings
+
+## Project Overview
+This is an AI-generated art portfolio repo. The user creates graphic novels, renders, and creative experiments using Gemini image generation (via MCP) and Claude Code. The GitHub repo is at: https://github.com/sebitasaquiles2018-bot/nano
+
+## Gemini MCP Tools Available
+- `generate_image` — Text-to-image generation. Supports a `prompt` and optional `saveToFilePath`.
+- `edit_image` — Edit an existing image with a prompt. Accepts image via `path` or `dataBase64`.
+- `compose_images` — Combine 2-10 input images with a guiding prompt. Critical for character consistency.
+- `style_transfer` — Transfer style from a style image to a base image.
+
+## Graphic Novel Creation Workflow (Proven)
+
+### Step 1: Character Reference Sheets
+- Generate character turnaround/reference sheets FIRST before creating story pages.
+- Prompt pattern: "Character reference sheet of [character]. Full body front view and side view. [Costume/appearance details]. Bold ink outlines, comic book coloring, clean white background, character turnaround sheet style."
+- These references ensure visual consistency across all panels.
+- Save refs in the project folder (e.g., `graphic_novel/ref_einstein.png`).
+
+### Step 2: Compose Pages Using References
+- Use `compose_images` (NOT `generate_image`) for story pages — pass character reference sheets as input images.
+- This keeps characters looking consistent across pages.
+- Prompt pattern: "Graphic novel PAGE [N] with 2 panels. Use the character designs from the reference images exactly for consistency. Panel 1: [scene description]. Speech bubble [character]: '[dialogue]'. Panel 2: [scene description]. Speech bubble [character]: '[dialogue]'. Bold graphic novel art style, dramatic lighting, vibrant comic book colors, professional lettering, page number '[N]' at bottom."
+
+### Step 3: Cover Page
+- Generate cover AFTER story pages so you know the visual style.
+- Use `compose_images` with the same character refs for consistency.
+- Include: title, character hero poses, dramatic background, issue number, tagline.
+
+### Key Learnings & Tips
+1. **2 panels per page works best.** 6-panel pages are too complex and may fail (API returns no image).
+2. **Keep prompts detailed but focused.** Describe each panel clearly with scene, characters, actions, and dialogue.
+3. **Speech bubble text works!** Gemini can render readable text in speech bubbles when explicitly described in the prompt.
+4. **"Spider-Man" may be blocked** due to copyright. Use alternative names like "Spider-Strike" for the character reference, but the compose tool can still produce Spider-Man-like characters when working from a reference sheet.
+5. **Realistic vs comic style:** Add "Photorealistic rendering, cinematic lighting, highly detailed faces" for realism, or "Bold graphic novel art style, vibrant comic book colors, ink outlines" for comic style.
+6. **Page numbers:** Include "page number 'N' at bottom" in the prompt and they render correctly.
+7. **Image sizes:** Generated images are typically 500KB-1.1MB JPEG files.
+8. **Failed generations:** If `generate_image` fails with "No image data returned," simplify the prompt or break into fewer panels.
+
+## Folder Structure
+```
+nano/
+├── CLAUDE.md                          # This file - session learnings
+├── .gitignore
+├── MCP-SETUP-GUIDE.md
+├── gaming_pc.png                      # Standalone renders
+├── einstein_newton_chat.png
+├── einstein_newton_realistic.png
+├── graphic_novel/                     # Graphic novel project
+│   ├── index.html                     # HTML reader (dark theme, keyboard nav, fullscreen)
+│   ├── cover.png
+│   ├── ref_einstein.png               # Character reference sheet
+│   ├── ref_spiderhero.png             # Character reference sheet
+│   ├── page1.png
+│   ├── page2.png
+│   └── page3.png
+└── images/                            # Other images
+```
+
+## Git & GitHub Setup
+- GitHub CLI (`gh`) is installed via winget and authenticated as `sebitasaquiles2018-bot`.
+- Git identity for this repo: `sebitasaquiles2018-bot` / `sebitasaquiles2018-bot@users.noreply.github.com`
+- Remote: `origin` -> `https://github.com/sebitasaquiles2018-bot/nano.git`
+- `gh` binary path: `/c/Program Files/GitHub CLI/gh.exe` (needs `export PATH="/c/Program Files/GitHub CLI:$PATH"` in bash).
+
+## HTML Reader
+- Located at `graphic_novel/index.html` — a self-contained single-file reader.
+- Features: dark theme, thumbnail strip, page navigation (prev/next + dots), keyboard arrows, click-to-fullscreen.
+- Pages are defined in a JS array at the top of the script — easy to add new pages.
+- To add a new page: just add `{ src: 'pageN.png', label: 'Page N' }` to the `pages` array.
+
+## Future Session Notes
+- When creating new graphic novels, always start with character reference sheets.
+- Use `compose_images` with refs for all story pages.
+- The user prefers realistic style with readable speech bubble text.
+- Commit and push after new content is created — user likes keeping the repo up to date.
