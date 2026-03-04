@@ -25,7 +25,7 @@
       font-size: 2.2rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #f7d94e);
+      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #f7d94e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -84,6 +84,11 @@
       box-shadow: 0 12px 40px rgba(34, 211, 238, 0.15);
     }
 
+    .card.issue5:hover {
+      border-color: #22c55e;
+      box-shadow: 0 12px 40px rgba(34, 197, 94, 0.15);
+    }
+
     .card-cover {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -116,6 +121,10 @@
 
     .card.issue4 .card-body h2 {
       color: #22d3ee;
+    }
+
+    .card.issue5 .card-body h2 {
+      color: #22c55e;
     }
 
     .card-body .subtitle {
@@ -163,6 +172,12 @@
       background: rgba(34, 211, 238, 0.12);
       border: 1px solid rgba(34, 211, 238, 0.3);
       color: #22d3ee;
+    }
+
+    .card.issue5 .badge {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #22c55e;
     }
 
     .footer {
@@ -228,6 +243,18 @@
         <span class="badge">Issue #4</span>
         <h2>The Quantum Plague</h2>
         <p class="subtitle">Your world is now my data.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card issue5" href="graphic_novel_p5/index.html">
+      <img class="card-cover" src="graphic_novel_p5/cover.png" alt="Issue #5 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #5</span>
+        <h2>Nexus Reborn</h2>
+        <p class="subtitle">He evolved. He adapted. He returned.</p>
         <div class="meta">
           <span>6 Pages</span>
         </div>
