@@ -25,7 +25,7 @@
       font-size: 2.2rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #f7d94e, #a855f7, #f7d94e);
+      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #f7d94e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -40,9 +40,9 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 2.5rem;
-      max-width: 960px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 3rem 2rem 4rem;
     }
@@ -74,6 +74,11 @@
       box-shadow: 0 12px 40px rgba(168, 85, 247, 0.15);
     }
 
+    .card.issue3:hover {
+      border-color: #ef4444;
+      box-shadow: 0 12px 40px rgba(239, 68, 68, 0.15);
+    }
+
     .card-cover {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -98,6 +103,10 @@
 
     .card.issue2 .card-body h2 {
       color: #a855f7;
+    }
+
+    .card.issue3 .card-body h2 {
+      color: #ef4444;
     }
 
     .card-body .subtitle {
@@ -133,6 +142,12 @@
       background: rgba(168, 85, 247, 0.12);
       border: 1px solid rgba(168, 85, 247, 0.3);
       color: #a855f7;
+    }
+
+    .card.issue3 .badge {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
     }
 
     .footer {
@@ -174,6 +189,18 @@
         <span class="badge">Issue #2</span>
         <h2>The Dark Equation</h2>
         <p class="subtitle">Darkness rises. The equation breaks.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card issue3" href="graphic_novel_p3/index.html">
+      <img class="card-cover" src="graphic_novel_p3/cover.png" alt="Issue #3 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #3</span>
+        <h2>Rise of the Master</h2>
+        <p class="subtitle">The puppet master reveals himself.</p>
         <div class="meta">
           <span>6 Pages</span>
         </div>
