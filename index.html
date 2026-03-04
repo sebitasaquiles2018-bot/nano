@@ -25,7 +25,7 @@
       font-size: 2.2rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f7d94e);
+      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #f7d94e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -94,6 +94,11 @@
       box-shadow: 0 12px 40px rgba(251, 191, 36, 0.15);
     }
 
+    .card.issue7:hover {
+      border-color: #f97316;
+      box-shadow: 0 12px 40px rgba(249, 115, 22, 0.15);
+    }
+
     .card-cover {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -134,6 +139,10 @@
 
     .card.issue6 .card-body h2 {
       color: #fbbf24;
+    }
+
+    .card.issue7 .card-body h2 {
+      color: #f97316;
     }
 
     .card-body .subtitle {
@@ -193,6 +202,12 @@
       background: rgba(251, 191, 36, 0.12);
       border: 1px solid rgba(251, 191, 36, 0.3);
       color: #fbbf24;
+    }
+
+    .card.issue7 .badge {
+      background: rgba(249, 115, 22, 0.12);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+      color: #f97316;
     }
 
     .footer {
@@ -282,6 +297,18 @@
         <span class="badge">Issue #6</span>
         <h2>The Alliance</h2>
         <p class="subtitle">Three heroes. Three villains. One final battle.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card issue7" href="graphic_novel_p7/index.html">
+      <img class="card-cover" src="graphic_novel_p7/cover.png" alt="Issue #7 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #7</span>
+        <h2>The Depths Below</h2>
+        <p class="subtitle">Something ancient has awakened.</p>
         <div class="meta">
           <span>6 Pages</span>
         </div>
