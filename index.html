@@ -25,7 +25,7 @@
       font-size: 2.2rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #f7d94e);
+      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #f7d94e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -40,9 +40,9 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2.5rem;
-      max-width: 1100px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 3rem 2rem 4rem;
     }
@@ -79,6 +79,11 @@
       box-shadow: 0 12px 40px rgba(239, 68, 68, 0.15);
     }
 
+    .card.issue4:hover {
+      border-color: #22d3ee;
+      box-shadow: 0 12px 40px rgba(34, 211, 238, 0.15);
+    }
+
     .card-cover {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -107,6 +112,10 @@
 
     .card.issue3 .card-body h2 {
       color: #ef4444;
+    }
+
+    .card.issue4 .card-body h2 {
+      color: #22d3ee;
     }
 
     .card-body .subtitle {
@@ -148,6 +157,12 @@
       background: rgba(239, 68, 68, 0.12);
       border: 1px solid rgba(239, 68, 68, 0.3);
       color: #ef4444;
+    }
+
+    .card.issue4 .badge {
+      background: rgba(34, 211, 238, 0.12);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      color: #22d3ee;
     }
 
     .footer {
@@ -201,6 +216,18 @@
         <span class="badge">Issue #3</span>
         <h2>Rise of the Master</h2>
         <p class="subtitle">The puppet master reveals himself.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card issue4" href="graphic_novel_p4/index.html">
+      <img class="card-cover" src="graphic_novel_p4/cover.png" alt="Issue #4 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #4</span>
+        <h2>The Quantum Plague</h2>
+        <p class="subtitle">Your world is now my data.</p>
         <div class="meta">
           <span>6 Pages</span>
         </div>
