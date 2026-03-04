@@ -25,7 +25,7 @@
       font-size: 2.2rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #f7d94e);
+      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f7d94e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -89,6 +89,11 @@
       box-shadow: 0 12px 40px rgba(34, 197, 94, 0.15);
     }
 
+    .card.issue6:hover {
+      border-color: #fbbf24;
+      box-shadow: 0 12px 40px rgba(251, 191, 36, 0.15);
+    }
+
     .card-cover {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -125,6 +130,10 @@
 
     .card.issue5 .card-body h2 {
       color: #22c55e;
+    }
+
+    .card.issue6 .card-body h2 {
+      color: #fbbf24;
     }
 
     .card-body .subtitle {
@@ -178,6 +187,12 @@
       background: rgba(34, 197, 94, 0.12);
       border: 1px solid rgba(34, 197, 94, 0.3);
       color: #22c55e;
+    }
+
+    .card.issue6 .badge {
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      color: #fbbf24;
     }
 
     .footer {
@@ -255,6 +270,18 @@
         <span class="badge">Issue #5</span>
         <h2>Nexus Reborn</h2>
         <p class="subtitle">He evolved. He adapted. He returned.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card issue6" href="graphic_novel_p6/index.html">
+      <img class="card-cover" src="graphic_novel_p6/cover.png" alt="Issue #6 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #6</span>
+        <h2>The Alliance</h2>
+        <p class="subtitle">Three heroes. Three villains. One final battle.</p>
         <div class="meta">
           <span>6 Pages</span>
         </div>
