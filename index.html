@@ -25,7 +25,7 @@
       font-size: 2.2rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #f7d94e);
+      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #6366f1, #f7d94e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -99,6 +99,11 @@
       box-shadow: 0 12px 40px rgba(249, 115, 22, 0.15);
     }
 
+    .card.issue8:hover {
+      border-color: #6366f1;
+      box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+    }
+
     .card-cover {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -143,6 +148,10 @@
 
     .card.issue7 .card-body h2 {
       color: #f97316;
+    }
+
+    .card.issue8 .card-body h2 {
+      color: #6366f1;
     }
 
     .card-body .subtitle {
@@ -208,6 +217,12 @@
       background: rgba(249, 115, 22, 0.12);
       border: 1px solid rgba(249, 115, 22, 0.3);
       color: #f97316;
+    }
+
+    .card.issue8 .badge {
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #6366f1;
     }
 
     .footer {
@@ -309,6 +324,18 @@
         <span class="badge">Issue #7</span>
         <h2>The Depths Below</h2>
         <p class="subtitle">Something ancient has awakened.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card issue8" href="graphic_novel_p8/index.html">
+      <img class="card-cover" src="graphic_novel_p8/cover.png" alt="Issue #8 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #8</span>
+        <h2>The Mirror Dimension</h2>
+        <p class="subtitle">Face yourself... or fall.</p>
         <div class="meta">
           <span>6 Pages</span>
         </div>
