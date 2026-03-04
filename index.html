@@ -25,7 +25,7 @@
       font-size: 2.2rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #6366f1, #f7d94e);
+      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #6366f1, #14b8a6, #f7d94e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -104,6 +104,11 @@
       box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
     }
 
+    .card.issue9:hover {
+      border-color: #14b8a6;
+      box-shadow: 0 12px 40px rgba(20, 184, 166, 0.15);
+    }
+
     .card-cover {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -152,6 +157,10 @@
 
     .card.issue8 .card-body h2 {
       color: #6366f1;
+    }
+
+    .card.issue9 .card-body h2 {
+      color: #14b8a6;
     }
 
     .card-body .subtitle {
@@ -223,6 +232,12 @@
       background: rgba(99, 102, 241, 0.12);
       border: 1px solid rgba(99, 102, 241, 0.3);
       color: #6366f1;
+    }
+
+    .card.issue9 .badge {
+      background: rgba(20, 184, 166, 0.12);
+      border: 1px solid rgba(20, 184, 166, 0.3);
+      color: #14b8a6;
     }
 
     .footer {
@@ -336,6 +351,18 @@
         <span class="badge">Issue #8</span>
         <h2>The Mirror Dimension</h2>
         <p class="subtitle">Face yourself... or fall.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card issue9" href="graphic_novel_p9/index.html">
+      <img class="card-cover" src="graphic_novel_p9/cover.png" alt="Issue #9 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #9</span>
+        <h2>First Contact</h2>
+        <p class="subtitle">They are not alone.</p>
         <div class="meta">
           <span>6 Pages</span>
         </div>
