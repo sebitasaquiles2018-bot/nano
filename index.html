@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Einstein & Spider-Strike — Graphic Novel Series</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      background: linear-gradient(180deg, #1a1a2e 0%, #0a0a0a 100%);
+      border-bottom: 1px solid #222;
+    }
+
+    .header h1 {
+      font-size: 2.2rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #f7d94e, #a855f7, #f7d94e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      color: #777;
+      margin-top: 0.6rem;
+      font-size: 1rem;
+      letter-spacing: 1px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2.5rem;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 3rem 2rem 4rem;
+    }
+
+    .card {
+      background: #111;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #222;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .card.issue1:hover {
+      border-color: #f0a030;
+      box-shadow: 0 12px 40px rgba(240, 160, 48, 0.15);
+    }
+
+    .card.issue2:hover {
+      border-color: #a855f7;
+      box-shadow: 0 12px 40px rgba(168, 85, 247, 0.15);
+    }
+
+    .card-cover {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-body {
+      padding: 1.2rem 1.5rem 1.5rem;
+    }
+
+    .card-body h2 {
+      font-size: 1.15rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+
+    .card.issue1 .card-body h2 {
+      color: #f0a030;
+    }
+
+    .card.issue2 .card-body h2 {
+      color: #a855f7;
+    }
+
+    .card-body .subtitle {
+      color: #999;
+      font-size: 0.9rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .card-body .meta {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: #666;
+      letter-spacing: 0.5px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .card.issue1 .badge {
+      background: rgba(240, 160, 48, 0.12);
+      border: 1px solid rgba(240, 160, 48, 0.3);
+      color: #f0a030;
+    }
+
+    .card.issue2 .badge {
+      background: rgba(168, 85, 247, 0.12);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      color: #a855f7;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      color: #444;
+      font-size: 0.8rem;
+      border-top: 1px solid #1a1a1a;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 { font-size: 1.5rem; }
+      .grid { padding: 2rem 1rem; gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Einstein & Spider-Strike</h1>
+    <p>Graphic Novel Series</p>
+  </div>
+
+  <div class="grid">
+    <a class="card issue1" href="graphic_novel/index.html">
+      <img class="card-cover" src="graphic_novel/cover.png" alt="Issue #1 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #1</span>
+        <h2>The Multiverse Equation</h2>
+        <p class="subtitle">Where science meets the spider-verse.</p>
+        <div class="meta">
+          <span>3 Pages</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card issue2" href="graphic_novel_p2/index.html">
+      <img class="card-cover" src="graphic_novel_p2/cover.png" alt="Issue #2 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #2</span>
+        <h2>The Dark Equation</h2>
+        <p class="subtitle">Darkness rises. The equation breaks.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="footer">
+    AI-Generated Art &mdash; Created with Gemini &amp; Claude Code
+  </div>
+</body>
+</html>
