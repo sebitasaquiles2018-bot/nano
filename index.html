@@ -25,7 +25,7 @@
       font-size: 2.2rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #6366f1, #14b8a6, #8b5cf6, #f7d94e);
+      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #6366f1, #14b8a6, #8b5cf6, #b45309, #f7d94e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -114,6 +114,11 @@
       box-shadow: 0 12px 40px rgba(139, 92, 246, 0.15);
     }
 
+    .card.issue11:hover {
+      border-color: #b45309;
+      box-shadow: 0 12px 40px rgba(180, 83, 9, 0.15);
+    }
+
     .card-cover {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -170,6 +175,10 @@
 
     .card.issue10 .card-body h2 {
       color: #8b5cf6;
+    }
+
+    .card.issue11 .card-body h2 {
+      color: #b45309;
     }
 
     .card-body .subtitle {
@@ -253,6 +262,12 @@
       background: rgba(139, 92, 246, 0.12);
       border: 1px solid rgba(139, 92, 246, 0.3);
       color: #8b5cf6;
+    }
+
+    .card.issue11 .badge {
+      background: rgba(180, 83, 9, 0.12);
+      border: 1px solid rgba(180, 83, 9, 0.3);
+      color: #b45309;
     }
 
     .footer {
@@ -390,6 +405,18 @@
         <span class="badge">Issue #10</span>
         <h2>Shadow Hunt</h2>
         <p class="subtitle">No one is safe in the dark.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card issue11" href="graphic_novel_p11/index.html">
+      <img class="card-cover" src="graphic_novel_p11/cover.png" alt="Issue #11 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #11</span>
+        <h2>The Puppeteer</h2>
+        <p class="subtitle">Everyone dances on someone's strings.</p>
         <div class="meta">
           <span>6 Pages</span>
         </div>
