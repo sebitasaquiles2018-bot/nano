@@ -25,7 +25,7 @@
       font-size: 2.2rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #6366f1, #14b8a6, #8b5cf6, #b45309, #38bdf8, #f7d94e);
+      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #6366f1, #14b8a6, #8b5cf6, #b45309, #38bdf8, #dc2626, #f7d94e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -124,6 +124,11 @@
       box-shadow: 0 12px 40px rgba(56, 189, 248, 0.15);
     }
 
+    .card.issue13:hover {
+      border-color: #dc2626;
+      box-shadow: 0 12px 40px rgba(220, 38, 38, 0.15);
+    }
+
     .card-cover {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -188,6 +193,10 @@
 
     .card.issue12 .card-body h2 {
       color: #38bdf8;
+    }
+
+    .card.issue13 .card-body h2 {
+      color: #dc2626;
     }
 
     .card-body .subtitle {
@@ -283,6 +292,12 @@
       background: rgba(56, 189, 248, 0.12);
       border: 1px solid rgba(56, 189, 248, 0.3);
       color: #38bdf8;
+    }
+
+    .card.issue13 .badge {
+      background: rgba(220, 38, 38, 0.12);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      color: #dc2626;
     }
 
     .footer {
@@ -444,6 +459,18 @@
         <span class="badge">Issue #12</span>
         <h2>The Architect</h2>
         <p class="subtitle">He designed everything.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card issue13" href="graphic_novel_p13/index.html">
+      <img class="card-cover" src="graphic_novel_p13/cover.png" alt="Issue #13 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #13</span>
+        <h2>The Final Design</h2>
+        <p class="subtitle">The clock is ticking.</p>
         <div class="meta">
           <span>6 Pages</span>
         </div>
