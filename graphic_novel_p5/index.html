@@ -38,6 +38,18 @@
       font-size: 0.9rem;
     }
 
+    .back-link {
+      display: inline-block;
+      margin-bottom: 0.8rem;
+      color: #22c55e;
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+    }
+    .back-link:hover { opacity: 1; }
+
     .header .issue-badge {
       display: inline-block;
       margin-top: 0.5rem;
@@ -258,6 +270,7 @@
 </head>
 <body>
   <div class="header">
+    <a href="../index.html" class="back-link">&larr; All Issues</a>
     <h1>Einstein & Spider-Strike</h1>
     <p>Nexus Reborn</p>
     <span class="issue-badge">Issue #5</span>
