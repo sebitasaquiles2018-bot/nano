@@ -25,7 +25,7 @@
       font-size: 2.2rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #6366f1, #14b8a6, #8b5cf6, #b45309, #38bdf8, #dc2626, #4ade80, #f59e0b, #0ea5e9, #eab308, #64748b, #e11d48, #f97316, #2dd4bf, #a78bfa, #991b1b, #10b981, #f7d94e);
+      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #6366f1, #14b8a6, #8b5cf6, #b45309, #38bdf8, #dc2626, #4ade80, #f59e0b, #0ea5e9, #eab308, #64748b, #e11d48, #f97316, #2dd4bf, #a78bfa, #991b1b, #10b981, #8b5cf6, #f7d94e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -184,6 +184,11 @@
       box-shadow: 0 12px 40px rgba(16, 185, 129, 0.15);
     }
 
+    .card.issue25:hover {
+      border-color: #8b5cf6;
+      box-shadow: 0 12px 40px rgba(139, 92, 246, 0.15);
+    }
+
     .card-cover {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -296,6 +301,10 @@
 
     .card.issue24 .card-body h2 {
       color: #10b981;
+    }
+
+    .card.issue25 .card-body h2 {
+      color: #8b5cf6;
     }
 
     .card-body .subtitle {
@@ -463,6 +472,12 @@
       background: rgba(16, 185, 129, 0.12);
       border: 1px solid rgba(16, 185, 129, 0.3);
       color: #10b981;
+    }
+
+    .card.issue25 .badge {
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #8b5cf6;
     }
 
     .footer {
@@ -773,7 +788,45 @@
         </div>
       </div>
     </a>
+
+    <a class="card issue25" href="graphic_novel_p25/index.html">
+      <img class="card-cover" src="graphic_novel_p25/cover.png" alt="Issue #25 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #25</span>
+        <h2>Puppeteer's Crown</h2>
+        <p class="subtitle">Your mind is no longer yours.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
   </div>
+
+  <div class="header" style="padding: 2rem 1rem 1.5rem; margin-top: 1rem; border-top: 1px solid #222;">
+    <h1 style="font-size: 1.8rem; background: linear-gradient(90deg, #00e5ff, #76ff03, #00e5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Tata the Genius</h1>
+    <p>A new series &mdash; Telekinetic genius. Every use costs his mind.</p>
+  </div>
+
+  <div class="grid" style="padding-top: 1.5rem;">
+    <a class="card tata1" href="ai%20studio%201/tata_genius/index.html">
+      <img class="card-cover" src="ai%20studio%201/tata_genius/cover.png" alt="Tata Issue #1 Cover">
+      <div class="card-body">
+        <span class="badge" style="background: rgba(0,229,255,0.12); border: 1px solid rgba(0,229,255,0.3); color: #00e5ff;">Issue #1</span>
+        <h2 style="color: #00e5ff;">The Price of Power</h2>
+        <p class="subtitle">The smarter the mind... the greater the sacrifice.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <style>
+    .card.tata1:hover {
+      border-color: #00e5ff;
+      box-shadow: 0 12px 40px rgba(0, 229, 255, 0.15);
+    }
+  </style>
 
   <div class="footer">
     AI-Generated Art &mdash; Created with Gemini &amp; Claude Code

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tata the Genius - Issue #1: The Price of Power</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #060a10;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .back-link {
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    z-index: 100;
+    color: #00e5ff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.25);
+    padding: 6px 16px;
+    border-radius: 8px;
+    transition: all 0.3s;
+    backdrop-filter: blur(8px);
+  }
+  .back-link:hover {
+    background: rgba(0,229,255,0.18);
+    border-color: #00e5ff;
+    box-shadow: 0 0 12px rgba(0,229,255,0.3);
+  }
+
+  header {
+    text-align: center;
+    padding: 60px 20px 30px;
+    background: linear-gradient(180deg, #00e5ff15 0%, transparent 100%);
+  }
+  header h1 {
+    font-size: 2.8rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #00e5ff, #76ff03, #00e5ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  header h2 {
+    font-size: 1.3rem;
+    color: #76ff03;
+    font-weight: 400;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  header .issue-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #00e5ff, #00b8d4);
+    color: #000;
+    font-weight: 800;
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    margin-top: 8px;
+  }
+  header .tagline {
+    color: #90a4ae;
+    font-style: italic;
+    margin-top: 12px;
+    font-size: 1rem;
+  }
+
+  .thumbnail-strip {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 20px;
+    flex-wrap: wrap;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .thumbnail-strip img {
+    width: 72px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    opacity: 0.5;
+    transition: all 0.3s;
+  }
+  .thumbnail-strip img:hover {
+    opacity: 0.8;
+    border-color: rgba(0,229,255,0.4);
+  }
+  .thumbnail-strip img.active {
+    opacity: 1;
+    border-color: #00e5ff;
+    box-shadow: 0 0 10px rgba(0,229,255,0.4);
+  }
+
+  .page-viewer {
+    max-width: 900px;
+    margin: 10px auto 20px;
+    padding: 0 20px;
+    text-align: center;
+    position: relative;
+  }
+  .page-viewer img {
+    width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 10px;
+    border: 2px solid rgba(0,229,255,0.15);
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+  .page-viewer img:hover {
+    border-color: rgba(0,229,255,0.4);
+  }
+  .page-label {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    color: #00e5ff;
+    font-weight: 600;
+  }
+
+  .nav-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 20px 30px;
+  }
+  .nav-btn {
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.3);
+    color: #00e5ff;
+    padding: 10px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  .nav-btn:hover:not(:disabled) {
+    background: rgba(0,229,255,0.2);
+    border-color: #00e5ff;
+    box-shadow: 0 0 15px rgba(0,229,255,0.25);
+  }
+  .nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .page-dots {
+    display: flex;
+    gap: 8px;
+  }
+  .page-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(0,229,255,0.2);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .page-dots span.active {
+    background: #00e5ff;
+    box-shadow: 0 0 8px rgba(0,229,255,0.5);
+  }
+  .page-dots span:hover {
+    background: rgba(0,229,255,0.5);
+  }
+
+  .fullscreen-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    cursor: zoom-out;
+  }
+  .fullscreen-overlay.show { display: flex; }
+  .fullscreen-overlay img {
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 30px 20px;
+    color: #546e7a;
+    font-size: 0.8rem;
+    border-top: 1px solid rgba(0,229,255,0.08);
+  }
+  footer a { color: #00e5ff; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<a href="../../index.html" class="back-link">&larr; All Series</a>
+
+<header>
+  <h1>Tata the Genius</h1>
+  <h2>The Price of Power</h2>
+  <div class="issue-badge">ISSUE #1</div>
+  <p class="tagline">The smarter the mind... the greater the sacrifice.</p>
+</header>
+
+<div class="thumbnail-strip" id="thumbs"></div>
+
+<div class="page-viewer">
+  <img id="mainImage" src="cover.png" alt="Current page" onclick="openFullscreen()">
+  <div class="page-label" id="pageLabel">Cover</div>
+</div>
+
+<div class="nav-controls">
+  <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">&larr; Prev</button>
+  <div class="page-dots" id="dots"></div>
+  <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Next &rarr;</button>
+</div>
+
+<div class="fullscreen-overlay" id="fullscreen" onclick="closeFullscreen()">
+  <img id="fullscreenImg" src="" alt="Fullscreen">
+</div>
+
+<footer>
+  <p>Tata the Genius &mdash; Created with AI by <a href="https://github.com/sebitasaquiles2018-bot/nano" target="_blank">Nano Studio</a></p>
+</footer>
+
+<script>
+const pages = [
+  { src: 'cover.png', label: 'Cover' },
+  { src: 'page1.png', label: 'Page 1 — The Genius' },
+  { src: 'page2.png', label: 'Page 2 — First Cost' },
+  { src: 'page3.png', label: 'Page 3 — Mindbreaker Strikes' },
+  { src: 'page4.png', label: 'Page 4 — Losing His Mind' },
+  { src: 'page5.png', label: 'Page 5 — ENOUGH!!!' },
+  { src: 'page6.png', label: 'Page 6 — Worth It' }
+];
+
+let current = 0;
+
+function init() {
+  const thumbs = document.getElementById('thumbs');
+  const dots = document.getElementById('dots');
+  pages.forEach((p, i) => {
+    const img = document.createElement('img');
+    img.src = p.src;
+    img.alt = p.label;
+    img.onclick = () => goTo(i);
+    thumbs.appendChild(img);
+
+    const dot = document.createElement('span');
+    dot.onclick = () => goTo(i);
+    dots.appendChild(dot);
+  });
+  goTo(0);
+}
+
+function goTo(index) {
+  current = index;
+  document.getElementById('mainImage').src = pages[current].src;
+  document.getElementById('pageLabel').textContent = pages[current].label;
+
+  document.querySelectorAll('.thumbnail-strip img').forEach((img, i) => {
+    img.classList.toggle('active', i === current);
+  });
+  document.querySelectorAll('.page-dots span').forEach((dot, i) => {
+    dot.classList.toggle('active', i === current);
+  });
+
+  document.getElementById('prevBtn').disabled = current === 0;
+  document.getElementById('nextBtn').disabled = current === pages.length - 1;
+}
+
+function navigate(dir) {
+  const next = current + dir;
+  if (next >= 0 && next < pages.length) goTo(next);
+}
+
+function openFullscreen() {
+  const overlay = document.getElementById('fullscreen');
+  document.getElementById('fullscreenImg').src = pages[current].src;
+  overlay.classList.add('show');
+}
+function closeFullscreen() {
+  document.getElementById('fullscreen').classList.remove('show');
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') navigate(-1);
+  if (e.key === 'ArrowRight') navigate(1);
+  if (e.key === 'Escape') closeFullscreen();
+  if (e.key === 'f' || e.key === 'F') {
+    if (document.getElementById('fullscreen').classList.contains('show')) {
+      closeFullscreen();
+    } else {
+      openFullscreen();
+    }
+  }
+});
+
+init();
+</script>
+</body>
+</html>
