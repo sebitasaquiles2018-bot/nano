@@ -25,7 +25,7 @@
       font-size: 2.2rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #6366f1, #14b8a6, #8b5cf6, #b45309, #38bdf8, #dc2626, #4ade80, #f59e0b, #0ea5e9, #eab308, #64748b, #e11d48, #f97316, #2dd4bf, #a78bfa, #f7d94e);
+      background: linear-gradient(90deg, #f7d94e, #a855f7, #ef4444, #22d3ee, #22c55e, #fbbf24, #f97316, #6366f1, #14b8a6, #8b5cf6, #b45309, #38bdf8, #dc2626, #4ade80, #f59e0b, #0ea5e9, #eab308, #64748b, #e11d48, #f97316, #2dd4bf, #a78bfa, #991b1b, #f7d94e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -174,6 +174,11 @@
       box-shadow: 0 12px 40px rgba(167, 139, 250, 0.15);
     }
 
+    .card.issue23:hover {
+      border-color: #991b1b;
+      box-shadow: 0 12px 40px rgba(153, 27, 27, 0.2);
+    }
+
     .card-cover {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -278,6 +283,10 @@
 
     .card.issue22 .card-body h2 {
       color: #a78bfa;
+    }
+
+    .card.issue23 .card-body h2 {
+      color: #991b1b;
     }
 
     .card-body .subtitle {
@@ -433,6 +442,12 @@
       background: rgba(167, 139, 250, 0.12);
       border: 1px solid rgba(167, 139, 250, 0.3);
       color: #a78bfa;
+    }
+
+    .card.issue23 .badge {
+      background: rgba(153, 27, 27, 0.12);
+      border: 1px solid rgba(153, 27, 27, 0.3);
+      color: #991b1b;
     }
 
     .footer {
@@ -714,6 +729,18 @@
         <span class="badge">Issue #22</span>
         <h2>Broken Clock</h2>
         <p class="subtitle">Time repeats. Someone is watching.</p>
+        <div class="meta">
+          <span>6 Pages</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card issue23" href="graphic_novel_p23/index.html">
+      <img class="card-cover" src="graphic_novel_p23/cover.png" alt="Issue #23 Cover">
+      <div class="card-body">
+        <span class="badge">Issue #23</span>
+        <h2>Plague of Shadows</h2>
+        <p class="subtitle">The darkness is alive.</p>
         <div class="meta">
           <span>6 Pages</span>
         </div>
