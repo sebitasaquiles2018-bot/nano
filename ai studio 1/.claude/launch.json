@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "khatun-khan",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "3000", "-d", "C:\\Users\\sebit\\OneDrive\\Documents\\claude_code\\nano\\ai studio 1"],
+      "port": 3000
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "gemini-nanobanana-mcp": {
+      "command": "node",
+      "args": ["C:\\Users\\sebit\\AppData\\Local\\npm-cache\\_npx\\f384cd18864de729\\node_modules\\gemini-nanobanana-mcp\\build\\index.js"],
+      "env": {
+        "GEMINI_API_KEY": "AIzaSyDwR1FzCOKuCDENOUxhvVnR5h0C5dC-xNA",
+        "GEMINI_IMAGE_ENDPOINT": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent",
+        "DEFAULT_SAVE_DIR": "C:\\Users\\sebit\\OneDrive\\Documents\\claude_code\\nano\\images",
+        "AUTO_SAVE": "true"
+      }
+    }
+  }
+}

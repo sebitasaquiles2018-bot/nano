@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samurai Katana — 3D Printable Model</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+  #canvas { display: block; width: 100vw; height: 100vh; }
+
+  #ui {
+    position: fixed; top: 0; right: 0; width: 320px; height: 100vh;
+    background: rgba(10, 10, 30, 0.92); border-left: 1px solid #333;
+    padding: 20px; overflow-y: auto; z-index: 10;
+  }
+  #ui h1 { font-size: 20px; color: #f0c040; margin-bottom: 4px; }
+  #ui .subtitle { font-size: 12px; color: #888; margin-bottom: 16px; }
+  #ui h2 { font-size: 14px; color: #ccc; margin: 16px 0 8px; border-bottom: 1px solid #333; padding-bottom: 4px; }
+
+  .part-card {
+    background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 8px;
+    padding: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.2s;
+  }
+  .part-card:hover { border-color: #f0c040; background: rgba(240,192,64,0.08); }
+  .part-card .name { font-weight: 600; font-size: 14px; color: #f0c040; }
+  .part-card .desc { font-size: 11px; color: #999; margin-top: 2px; }
+  .part-card .dims { font-size: 11px; color: #6a6; margin-top: 4px; }
+
+  .btn {
+    display: inline-block; padding: 8px 16px; border-radius: 6px; border: none;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; margin: 4px 2px;
+  }
+  .btn-export { background: #f0c040; color: #1a1a2e; }
+  .btn-export:hover { background: #ffd866; }
+  .btn-all { background: #4a9; color: #fff; width: 100%; margin-top: 8px; }
+  .btn-all:hover { background: #5cb; }
+  .btn-toggle { background: #444; color: #ddd; font-size: 11px; padding: 4px 10px; }
+  .btn-toggle.on { background: #f0c040; color: #1a1a2e; }
+
+  .info-box {
+    background: rgba(74,153,153,0.1); border: 1px solid #4a9; border-radius: 6px;
+    padding: 10px; font-size: 11px; color: #8cc; margin-top: 12px; line-height: 1.5;
+  }
+  .info-box strong { color: #4a9; }
+
+  #dims-display {
+    position: fixed; bottom: 20px; left: 20px; background: rgba(0,0,0,0.7);
+    padding: 8px 14px; border-radius: 6px; font-size: 12px; color: #aaa; z-index: 10;
+  }
+  .controls-hint { font-size: 11px; color: #666; text-align: center; margin-top: 12px; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<div id="ui">
+  <h1>Samurai Katana</h1>
+  <div class="subtitle">3D Printable — 3 Pieces, No Supports</div>
+
+  <h2>Parts (hover to highlight)</h2>
+  <div id="parts-list"></div>
+
+  <button class="btn btn-all" id="export-all">Export All Parts as STL</button>
+
+  <div class="info-box">
+    <strong>Print Settings:</strong><br>
+    Scale: 1 unit = 1 mm<br>
+    Total length: ~350mm (35cm) assembled<br>
+    3 pieces: blade + tsuba + handle<br>
+    Joint: blade tang goes through tsuba into handle slot<br>
+    Assembly: slide tang through tsuba, push into handle, glue<br>
+    Recommended: 0.2mm layer, 20% infill, PLA<br>
+    <strong>All parts print flat — zero supports!</strong>
+  </div>
+
+  <h2>Display</h2>
+  <div style="display:flex; gap:4px; flex-wrap:wrap;">
+    <button class="btn btn-toggle on" data-part="all">All</button>
+    <button class="btn btn-toggle on" data-part="blade">Blade</button>
+    <button class="btn btn-toggle on" data-part="tsuba">Tsuba</button>
+    <button class="btn btn-toggle on" data-part="handle">Handle</button>
+  </div>
+
+  <div class="controls-hint">
+    Left drag: rotate &middot; Right drag: pan &middot; Scroll: zoom
+  </div>
+</div>
+
+<div id="dims-display">Hover over a part for dimensions</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { STLExporter } from 'three/addons/exporters/STLExporter.js';
+
+// ── Scene ───────────────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a2e);
+scene.fog = new THREE.Fog(0x1a1a2e, 800, 2000);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
+camera.position.set(200, 300, 600);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.target.set(0, 100, 0);
+
+scene.add(new THREE.AmbientLight(0x404060, 0.6));
+const dirLight = new THREE.DirectionalLight(0xfff0dd, 1.2);
+dirLight.position.set(200, 400, 300);
+scene.add(dirLight);
+scene.add(new THREE.DirectionalLight(0x4466aa, 0.4).translateX(-200).translateY(100));
+scene.add(new THREE.GridHelper(1000, 40, 0x333355, 0x222244));
+
+// ── Materials ───────────────────────────────────────────────
+const bladeMat = new THREE.MeshStandardMaterial({ color: 0xd0d4da, metalness: 0.85, roughness: 0.15 });
+const handleMat = new THREE.MeshStandardMaterial({ color: 0x3a2010, metalness: 0.1, roughness: 0.8 });
+const tsubaMat = new THREE.MeshStandardMaterial({ color: 0x8B7355, metalness: 0.6, roughness: 0.3 });
+const grooveMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.05, roughness: 0.9 });
+const highlightMat = new THREE.MeshStandardMaterial({ color: 0xf0c040, metalness: 0.4, roughness: 0.3, emissive: 0xf0c040, emissiveIntensity: 0.15 });
+
+// ── Dimensions (mm) — 35cm total ────────────────────────────
+const BLADE_LEN = 230;       // blade length (without tang)
+const BLADE_WIDTH = 18;      // widest point at base
+const BLADE_THICK = 5;       // thickness (extrude depth)
+const BLADE_CURVE = 13;      // sori (curve amount)
+
+const TANG_W = 6;            // tang cross-section width
+const TANG_H = 4;            // tang cross-section height
+const TSUBA_THICK = 6;       // tsuba disc thickness
+const SLOT_DEPTH = 12;       // how deep tang goes into handle
+const TANG_TOTAL = TSUBA_THICK + SLOT_DEPTH; // total tang length = 18mm
+const TOL = 0.3;             // tolerance for glue fit
+
+const HANDLE_LEN = 110;      // handle length
+const HANDLE_W = 16;         // handle width
+const HANDLE_H = 12;         // handle height
+const TSUBA_RX = 20;         // tsuba radius X
+const TSUBA_RY = 17;         // tsuba radius Y
+
+// ── Chamfered rectangle profile (reusable) ──────────────────
+function chamferedRect(w, h, c) {
+  const s = new THREE.Shape();
+  s.moveTo(-w/2 + c, -h/2);
+  s.lineTo( w/2 - c, -h/2);
+  s.lineTo( w/2,     -h/2 + c);
+  s.lineTo( w/2,      h/2 - c);
+  s.lineTo( w/2 - c,  h/2);
+  s.lineTo(-w/2 + c,  h/2);
+  s.lineTo(-w/2,       h/2 - c);
+  s.lineTo(-w/2,      -h/2 + c);
+  s.closePath();
+  return s;
+}
+
+// ═══════════════════════════════════════════════════════════
+// PIECE 1: BLADE
+// Curved katana silhouette extruded flat. Tang extends downward.
+// Tang goes through tsuba AND into handle slot.
+// Prints flat on bed — zero overhangs.
+// ═══════════════════════════════════════════════════════════
+function buildBlade() {
+  const group = new THREE.Group();
+  group.name = 'blade';
+
+  const segments = 60;
+
+  function getBladeParams(t) {
+    const y = t * BLADE_LEN;
+    // Katana sori curve — peaks around 40% from base
+    const curve = BLADE_CURVE * Math.sin(t * Math.PI * 0.85);
+    let w;
+    if (t < 0.80) {
+      // Main blade body — gradual taper
+      w = BLADE_WIDTH / 2 * (1 - t * 0.12);
+    } else if (t < 0.92) {
+      // Yokote transition — blade narrows toward kissaki
+      const tt = (t - 0.80) / 0.12;
+      w = BLADE_WIDTH / 2 * (1 - 0.80 * 0.12) * (1 - tt * 0.5);
+    } else {
+      // Kissaki (tip) — distinct angled taper to a point
+      const tt = (t - 0.92) / 0.08;
+      const baseW = BLADE_WIDTH / 2 * (1 - 0.80 * 0.12) * 0.5;
+      w = baseW * (1 - tt);
+    }
+    return { y, curve, w: Math.max(w, 2.0) }; // min 2mm — thinner snaps off
+  }
+
+  // Build 2D silhouette
+  const shape = new THREE.Shape();
+  const spinePoints = [];
+  const edgePoints = [];
+
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    const p = getBladeParams(t);
+    spinePoints.push({ x: p.curve + p.w, y: p.y });
+    edgePoints.push({ x: p.curve - p.w, y: p.y });
+  }
+
+  shape.moveTo(spinePoints[0].x, spinePoints[0].y);
+  for (let i = 1; i < spinePoints.length; i++) {
+    shape.lineTo(spinePoints[i].x, spinePoints[i].y);
+  }
+  for (let i = edgePoints.length - 1; i >= 0; i--) {
+    shape.lineTo(edgePoints[i].x, edgePoints[i].y);
+  }
+  shape.closePath();
+
+  const bladeGeo = new THREE.ExtrudeGeometry(shape, {
+    depth: BLADE_THICK, bevelEnabled: false, steps: 1,
+  });
+  bladeGeo.translate(0, 0, -BLADE_THICK / 2);
+  bladeGeo.computeVertexNormals();
+  group.add(new THREE.Mesh(bladeGeo, bladeMat));
+
+  // Hamon line — visual only (excluded from STL)
+  const hamonShape = new THREE.Shape();
+  const hamonPts = [];
+  for (let i = 0; i <= 40; i++) {
+    const t = i / 40 * 0.78;
+    const p = getBladeParams(t);
+    const hx = p.curve - p.w * 0.2 + Math.sin(t * Math.PI * 6) * 1.5;
+    hamonPts.push({ x: hx, y: p.y });
+  }
+  hamonShape.moveTo(hamonPts[0].x, hamonPts[0].y);
+  for (let i = 1; i < hamonPts.length; i++) hamonShape.lineTo(hamonPts[i].x, hamonPts[i].y);
+  for (let i = hamonPts.length - 1; i >= 0; i--) hamonShape.lineTo(hamonPts[i].x + 1.5, hamonPts[i].y);
+  hamonShape.closePath();
+  const hamonGeo = new THREE.ExtrudeGeometry(hamonShape, { depth: 0.3, bevelEnabled: false });
+  hamonGeo.translate(0, 0, BLADE_THICK / 2 - 0.1);
+  const hamon = new THREE.Mesh(hamonGeo, new THREE.MeshStandardMaterial({ color: 0xf0f0f0, metalness: 0.9, roughness: 0.1 }));
+  hamon.userData.visualOnly = true;
+  group.add(hamon);
+
+  // Tang — extends downward TANG_TOTAL mm (through tsuba + into handle)
+  const tangGeo = new THREE.BoxGeometry(TANG_W, TANG_TOTAL, TANG_H);
+  const tang = new THREE.Mesh(tangGeo, bladeMat);
+  tang.position.set(0, -TANG_TOTAL / 2, 0);
+  group.add(tang);
+
+  return group;
+}
+
+// ═══════════════════════════════════════════════════════════
+// PIECE 2: TSUBA (GUARD) — flat oval disc with through-hole
+// Prints flat on bed — zero overhangs.
+// ═══════════════════════════════════════════════════════════
+function buildTsuba() {
+  const group = new THREE.Group();
+  group.name = 'tsuba';
+
+  const segments = 48;
+  const tsubaShape = new THREE.Shape();
+  for (let i = 0; i <= segments; i++) {
+    const a = (i / segments) * Math.PI * 2;
+    const x = Math.cos(a) * TSUBA_RX;
+    const z = Math.sin(a) * TSUBA_RY;
+    if (i === 0) tsubaShape.moveTo(x, z);
+    else tsubaShape.lineTo(x, z);
+  }
+
+  // Through-hole for tang (sized with tolerance)
+  const hole = new THREE.Path();
+  const hw = (TANG_W + TOL * 2) / 2;
+  const hh = (TANG_H + TOL * 2) / 2;
+  hole.moveTo(-hw, -hh);
+  hole.lineTo(hw, -hh);
+  hole.lineTo(hw, hh);
+  hole.lineTo(-hw, hh);
+  hole.closePath();
+  tsubaShape.holes.push(hole);
+
+  const tsubaGeo = new THREE.ExtrudeGeometry(tsubaShape, {
+    depth: TSUBA_THICK, bevelEnabled: false,
+  });
+  tsubaGeo.rotateX(-Math.PI / 2);
+  tsubaGeo.translate(0, TSUBA_THICK / 2, 0);
+  group.add(new THREE.Mesh(tsubaGeo, tsubaMat));
+
+  return group;
+}
+
+// ═══════════════════════════════════════════════════════════
+// PIECE 3: HANDLE (TSUKA)
+// Top section has a SLOT (rectangular hole in cross-section)
+// that receives the blade tang. Bottom section is solid.
+// NO peg — the tang IS the connector.
+// Prints on its side — chamfered edges = 45° max overhang.
+// ═══════════════════════════════════════════════════════════
+function buildHandle() {
+  const group = new THREE.Group();
+  group.name = 'handle';
+
+  const chamfer = 2;
+
+  // ── Slot section (top SLOT_DEPTH mm) ──
+  // Same chamfered profile but with a rectangular hole for the tang
+  const slotProfile = chamferedRect(HANDLE_W, HANDLE_H, chamfer);
+  const slotHole = new THREE.Path();
+  const sw = (TANG_W + TOL * 2) / 2;
+  const sh = (TANG_H + TOL * 2) / 2;
+  slotHole.moveTo(-sw, -sh);
+  slotHole.lineTo(sw, -sh);
+  slotHole.lineTo(sw, sh);
+  slotHole.lineTo(-sw, sh);
+  slotHole.closePath();
+  slotProfile.holes.push(slotHole);
+
+  const slotGeo = new THREE.ExtrudeGeometry(slotProfile, {
+    depth: SLOT_DEPTH, bevelEnabled: false, steps: 1,
+  });
+  // ExtrudeGeometry goes along +Z. RotateX(PI/2) maps +Z → +Y...
+  // but we need it to go along -Y. Use rotateX(-PI/2) to map +Z → -Y? No.
+  // rotateX(PI/2): y→-z, z→y. So extrusion (along +Z) goes to +Y.
+  // rotateX(-PI/2): y→z, z→-y. So extrusion goes to -Y. That's what we want.
+  slotGeo.rotateX(Math.PI / 2);
+  // Extrusion now goes along -Y: Y=0 to Y=-SLOT_DEPTH
+  const slotMesh = new THREE.Mesh(slotGeo, handleMat);
+  group.add(slotMesh);
+
+  // ── Main body (solid, below slot) ──
+  const bodyProfile = chamferedRect(HANDLE_W, HANDLE_H, chamfer);
+  const bodyLen = HANDLE_LEN - SLOT_DEPTH;
+  const bodyGeo = new THREE.ExtrudeGeometry(bodyProfile, {
+    depth: bodyLen, bevelEnabled: false, steps: 1,
+  });
+  bodyGeo.rotateX(Math.PI / 2);
+  const bodyMesh = new THREE.Mesh(bodyGeo, handleMat);
+  bodyMesh.position.set(0, -SLOT_DEPTH, 0);
+  group.add(bodyMesh);
+
+  // ── Recessed wrap grooves — visual only ──
+  const wrapCount = 8;
+  for (let i = 0; i < wrapCount; i++) {
+    const t = (i + 0.5) / wrapCount;
+    const y = -SLOT_DEPTH - t * bodyLen;
+    for (const side of [-1, 1]) {
+      const gGeo = new THREE.BoxGeometry(1, 2, HANDLE_H - 3);
+      const groove = new THREE.Mesh(gGeo, grooveMat);
+      groove.position.set(side * (HANDLE_W / 2 - 0.5), y, 0);
+      groove.userData.visualOnly = true;
+      group.add(groove);
+    }
+  }
+
+  // ── Pommel (kashira) — flat, no bevel ──
+  const pw = HANDLE_W + 2, ph = HANDLE_H + 2;
+  const pommelProfile = chamferedRect(pw, ph, chamfer);
+  const pommelGeo = new THREE.ExtrudeGeometry(pommelProfile, {
+    depth: 5, bevelEnabled: false,
+  });
+  pommelGeo.rotateX(Math.PI / 2);
+  const pommel = new THREE.Mesh(pommelGeo, tsubaMat);
+  pommel.position.set(0, -HANDLE_LEN, 0);
+  group.add(pommel);
+
+  return group;
+}
+
+// ── Assemble ────────────────────────────────────────────────
+const katanaGroup = new THREE.Group();
+
+const blade = buildBlade();
+// Blade base sits on top of tsuba
+blade.position.set(0, TSUBA_THICK / 2, 0);
+
+const tsuba = buildTsuba();
+// Tsuba centered at Y=0
+
+const handle = buildHandle();
+// Handle top meets bottom of tsuba
+handle.position.set(0, -TSUBA_THICK / 2, 0);
+
+katanaGroup.add(blade);
+katanaGroup.add(tsuba);
+katanaGroup.add(handle);
+
+katanaGroup.rotation.z = -Math.PI / 8;
+scene.add(katanaGroup);
+
+// ── Parts info ──────────────────────────────────────────────
+const partsInfo = [
+  {
+    name: 'Blade (Katana)',
+    key: 'blade',
+    desc: 'Curved katana silhouette with kissaki tip, hamon line, tang peg',
+    dims: `${BLADE_LEN}mm long, ${BLADE_WIDTH}mm wide, ${BLADE_THICK}mm thick`,
+    print: 'Print flat — curve is in the outline, not height',
+    group: blade,
+  },
+  {
+    name: 'Tsuba (Guard)',
+    key: 'tsuba',
+    desc: 'Flat oval disc with through-hole for tang',
+    dims: `${TSUBA_RX*2}x${TSUBA_RY*2}mm, ${TSUBA_THICK}mm thick`,
+    print: 'Print flat on bed',
+    group: tsuba,
+  },
+  {
+    name: 'Handle (Tsuka)',
+    key: 'handle',
+    desc: 'Chamfered grip with tang slot, recessed wraps, pommel',
+    dims: `${HANDLE_LEN}mm long, ${HANDLE_W}x${HANDLE_H}mm cross-section`,
+    print: 'Print on side (45° chamfers)',
+    group: handle,
+  },
+];
+
+// ── UI ──────────────────────────────────────────────────────
+const partsList = document.getElementById('parts-list');
+const dimsDisplay = document.getElementById('dims-display');
+
+partsInfo.forEach((part, idx) => {
+  const card = document.createElement('div');
+  card.className = 'part-card';
+  card.innerHTML = `
+    <div class="name">${part.name}</div>
+    <div class="desc">${part.desc}</div>
+    <div class="dims">${part.dims} &middot; ${part.print}</div>
+    <button class="btn btn-export" data-idx="${idx}">Export STL</button>
+  `;
+
+  card.addEventListener('mouseenter', () => {
+    dimsDisplay.textContent = `${part.name}: ${part.dims}`;
+    part.group.traverse(child => {
+      if (child.isMesh) {
+        child.userData.origMat = child.material;
+        child.material = highlightMat;
+      }
+    });
+  });
+  card.addEventListener('mouseleave', () => {
+    dimsDisplay.textContent = 'Hover over a part for dimensions';
+    part.group.traverse(child => {
+      if (child.isMesh && child.userData.origMat) {
+        child.material = child.userData.origMat;
+      }
+    });
+  });
+  card.querySelector('.btn-export').addEventListener('click', (e) => {
+    e.stopPropagation();
+    exportPart(part);
+  });
+  partsList.appendChild(card);
+});
+
+// ── STL Export ──────────────────────────────────────────────
+const exporter = new STLExporter();
+
+function exportPart(part) {
+  const geometries = [];
+  part.group.traverse(child => {
+    if (child.isMesh && !child.userData.visualOnly) {
+      const geo = child.geometry.clone();
+      child.updateWorldMatrix(true, false);
+      geo.applyMatrix4(child.matrixWorld);
+      geometries.push(geo);
+    }
+  });
+  const merged = mergeGeometries(geometries);
+  if (!merged) { alert('Export failed'); return; }
+  const data = exporter.parse(new THREE.Mesh(merged, bladeMat), { binary: true });
+  downloadSTL(data, `katana_${part.key}.stl`);
+}
+
+function mergeGeometries(geos) {
+  if (geos.length === 0) return null;
+  if (geos.length === 1) return geos[0];
+  let totalVerts = 0;
+  geos.forEach(g => { totalVerts += g.getAttribute('position').count; });
+  const positions = new Float32Array(totalVerts * 3);
+  const normals = new Float32Array(totalVerts * 3);
+  const indices = [];
+  let vertOffset = 0;
+  geos.forEach(g => {
+    const pos = g.getAttribute('position');
+    const norm = g.getAttribute('normal');
+    for (let i = 0; i < pos.count; i++) {
+      positions[(vertOffset + i) * 3] = pos.getX(i);
+      positions[(vertOffset + i) * 3 + 1] = pos.getY(i);
+      positions[(vertOffset + i) * 3 + 2] = pos.getZ(i);
+      if (norm) {
+        normals[(vertOffset + i) * 3] = norm.getX(i);
+        normals[(vertOffset + i) * 3 + 1] = norm.getY(i);
+        normals[(vertOffset + i) * 3 + 2] = norm.getZ(i);
+      }
+    }
+    if (g.index) {
+      for (let i = 0; i < g.index.count; i++) indices.push(g.index.array[i] + vertOffset);
+    } else {
+      for (let i = 0; i < pos.count; i++) indices.push(vertOffset + i);
+    }
+    vertOffset += pos.count;
+  });
+  const merged = new THREE.BufferGeometry();
+  merged.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  merged.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+  merged.setIndex(indices);
+  return merged;
+}
+
+function downloadSTL(data, filename) {
+  const blob = new Blob([data], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('export-all').addEventListener('click', () => {
+  partsInfo.forEach(part => exportPart(part));
+});
+
+// ── Toggles ─────────────────────────────────────────────────
+document.querySelectorAll('.btn-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.part;
+    btn.classList.toggle('on');
+    const vis = btn.classList.contains('on');
+    if (key === 'all') {
+      katanaGroup.visible = vis;
+      document.querySelectorAll('.btn-toggle').forEach(b => vis ? b.classList.add('on') : b.classList.remove('on'));
+    } else {
+      const info = partsInfo.find(p => p.key === key);
+      if (info) info.group.visible = vis;
+    }
+  });
+});
+
+// ── Render loop ─────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

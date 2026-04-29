@@ -90,6 +90,32 @@ nano/
 - Pages are defined in a JS array at the top of the script — easy to add new pages.
 - To add a new page: just add `{ src: 'pageN.png', label: 'Page N' }` to the `pages` array.
 
+## fal.ai Video Generation (Veo 3.1)
+
+For generating short videos (e.g., a historical figure delivering a quote with native lip sync), use the `video-quote` skill at `~/.claude/skills/video-quote/SKILL.md`.
+
+### Auth
+- API key is stored in the **`FAL_KEY`** user env var (set persistently via PowerShell `[System.Environment]::SetEnvironmentVariable('FAL_KEY', '...', 'User')`). **Never commit the key to this repo.**
+- Verify with `echo $FAL_KEY` (bash) or `$env:FAL_KEY` (PowerShell). Restart the shell after setting.
+
+### Gold path: image-to-video with native lip sync
+1. Generate a photoreal start frame (Nano Banana Pro), 720p+, 16:9 or 9:16, ≤ 8 MB.
+2. **Upload to fal storage**: `POST https://rest.alpha.fal.ai/storage/upload/initiate` with `{file_name, content_type}` → returns `{file_url, upload_url}`. PUT the bytes to `upload_url` (no auth header on PUT — signed URL carries auth).
+3. **Submit** to `https://queue.fal.run/fal-ai/veo3.1/image-to-video` with `{prompt, image_url, duration:"8s", resolution:"720p", aspect_ratio:"auto", generate_audio:true}`.
+4. **Poll** `status_url` every **15s** (don't go shorter — fal returns same status for ~10s windows). ~75s inference.
+5. **GET** `response_url` → download `result.video.url` to local mp4.
+
+Auth header on all calls: `Authorization: Key $FAL_KEY`.
+
+### Slug gotcha
+Not all model URLs are prefixed with `fal-ai/` — some vendors are namespaced directly (e.g., `bytedance/seedance-2.0/...`). Symptom of wrong slug: status `COMPLETED` instantly + result fetch returns `{"detail":"Path /xxx not found"}`. Fix: WebFetch the model's `/api` page to confirm.
+
+### Payload discipline
+`jq` is not always available — use `python3 -c 'import json; print(json.dumps(...))'`. Always echo the payload before submitting; an empty `-d ""` body silently submits with defaults (cost wasted, no error).
+
+### Veo 3.1 prompting (the cardinal rule)
+**The start frame locks identity.** Do not re-describe face/clothing/fixed scenery — the prompt is for *motion, dialogue, sound* between t=0 and t=8s. Five-component structure: subject+position → micro-action → quoted line with speech verb → ambient/SFX → style guard. Optimal 150–300 chars. Dialogue ≤ 15 words. See the skill for full details.
+
 ## Future Session Notes
 - When creating new graphic novels, always start with character reference sheets.
 - Use `compose_images` with refs for all story pages.

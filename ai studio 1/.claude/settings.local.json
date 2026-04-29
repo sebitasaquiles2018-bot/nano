@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__gemini-nanobanana-mcp__generate_image",
+      "mcp__gemini-nanobanana-mcp__compose_images",
+      "Bash(export PATH=\"/c/Program Files/GitHub CLI:$PATH\")",
+      "Bash(gh api repos/sebitasaquiles2018-bot/nano/pages/builds -X POST)",
+      "WebFetch(domain:sebitasaquiles2018-bot.github.io)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Users/sebit/OneDrive/Documents/claude_code/nano/ai studio 1/**)",
+      "Bash(done)",
+      "Bash(start \"\" \"/c/Users/sebit/OneDrive/Documents/claude_code/nano/ai studio 1/jin_sakai_game.html\")",
+      "Bash(gh repo:*)",
+      "Bash(gh api:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node -c khatun_khan.html)",
+      "Bash(sed -n '/<script>/,/<\\\\/script>/p' khatun_khan.html)",
+      "Bash(sed \"1d;$d\")",
+      "Bash(node -c /tmp/check.js)",
+      "Bash(sed -n '212,3614p' khatun_khan.html)",
+      "Bash(node --check /tmp/check.js)",
+      "Bash(ffprobe -v quiet -print_format json -show_format -show_streams 'C:/Users/sebit/OneDrive/Documents/claude_code/nano/ai studio 1/kling_20260307_作品_now_genera_1051_0.mp4')",
+      "mcp__13a549b6-5304-4f03-a582-2c58824892a5__show_threejs_scene",
+      "Bash(start \"\" \"C:/Users/sebit/OneDrive/Documents/claude_code/nano/ai studio 1/samurai_helmet.html\")",
+      "Bash(npx --version)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/samurai_helmet.html)",
+      "Bash(taskkill //F //IM python.exe)",
+      "mcp__13a549b6-5304-4f03-a582-2c58824892a5__learn_threejs",
+      "Bash(start \"\" \"C:\\\\Users\\\\sebit\\\\OneDrive\\\\Documents\\\\claude_code\\\\nano\\\\samurai_helmet_3d.html\")",
+      "WebSearch",
+      "Bash(start \"\" \"C:\\\\Users\\\\sebit\\\\OneDrive\\\\Documents\\\\claude_code\\\\nano\\\\ai studio 1\\\\samurai_katana_3d.html\")"
+    ]
+  }
+}

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Art of the Blade — How Swords Are Made</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #16161f;
+    --border: #2a2a3a;
+    --text: #d4d4dc;
+    --text-dim: #8888a0;
+    --accent: #e8943a;
+    --accent-glow: #e8943a44;
+    --heading: #f0e6d8;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ── Hero Section ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    background:
+      radial-gradient(ellipse at 50% 80%, #e8943a10 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 0%, #1a1a2f 0%, var(--bg) 70%);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="1" height="1" fill="%23ffffff08"/></svg>');
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    padding: 0.4rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 2rem;
+    background: var(--surface);
+  }
+
+  .hero h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    color: var(--heading);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 60px var(--accent-glow);
+  }
+
+  .hero h1 span {
+    display: block;
+    font-size: 0.45em;
+    font-family: 'Cinzel', serif;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    margin-top: 0.5rem;
+  }
+
+  .hero-intro {
+    max-width: 600px;
+    margin: 2rem auto 0;
+    font-size: 1.05rem;
+    color: var(--text-dim);
+    line-height: 1.9;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .scroll-hint svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--accent);
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(5px); }
+  }
+
+  /* ── Section Layout ── */
+  .section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 6rem 1.5rem;
+    position: relative;
+  }
+
+  .section:not(:last-of-type)::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 1px;
+    background: var(--border);
+    margin: 0 auto;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .step-number {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--accent);
+    opacity: 0.15;
+    line-height: 1;
+    margin-bottom: -0.5rem;
+  }
+
+  .section h2 {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: var(--heading);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  .section p {
+    margin-bottom: 1.2rem;
+    font-size: 1rem;
+  }
+
+  .section .highlight {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .callout {
+    background: var(--card);
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.92rem;
+    color: var(--text-dim);
+  }
+
+  .callout strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ── Images ── */
+  .section-image {
+    width: 100%;
+    border-radius: 12px;
+    margin: 2rem 0;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 60px #00000060;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .section-image:hover {
+    transform: scale(1.01);
+    box-shadow: 0 25px 80px #00000080;
+  }
+
+  .image-caption {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: -1rem;
+    margin-bottom: 2rem;
+    font-style: italic;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 4rem 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.8rem;
+  }
+
+  .footer .brand {
+    font-family: 'Cinzel', serif;
+    color: var(--accent);
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+  }
+
+  /* ── Nav Dots ── */
+  .nav-dots {
+    position: fixed;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 100;
+  }
+
+  .nav-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .nav-dot:hover,
+  .nav-dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+    transform: scale(1.3);
+  }
+
+  .nav-dot .tooltip {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    color: var(--text);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .nav-dot:hover .tooltip { opacity: 1; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .nav-dots { display: none; }
+    .section { padding: 4rem 1.2rem; }
+    .step-number { font-size: 3rem; }
+    .section h2 { font-size: 1.4rem; }
+  }
+
+  /* ── Fade-in animation ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation Dots -->
+<nav class="nav-dots">
+  <button class="nav-dot active" onclick="scrollTo('#hero')"><span class="tooltip">Top</span></button>
+  <button class="nav-dot" onclick="scrollTo('#step1')"><span class="tooltip">The Steel</span></button>
+  <button class="nav-dot" onclick="scrollTo('#step2')"><span class="tooltip">Forging</span></button>
+  <button class="nav-dot" onclick="scrollTo('#step3')"><span class="tooltip">Heat Treatment</span></button>
+  <button class="nav-dot" onclick="scrollTo('#step4')"><span class="tooltip">Grinding</span></button>
+  <button class="nav-dot" onclick="scrollTo('#step5')"><span class="tooltip">Assembly</span></button>
+</nav>
+
+<!-- Hero -->
+<header class="hero" id="hero">
+  <div class="hero-badge">An Illustrated Guide</div>
+  <h1>
+    The Art of the Blade
+    <span>How Swords Are Made</span>
+  </h1>
+  <p class="hero-intro">
+    From a raw bar of steel to a gleaming weapon — swordmaking is one of humanity's oldest crafts.
+    Every blade tells a story of fire, force, and patience. Here's how it all comes together.
+  </p>
+  <div class="scroll-hint">
+    <span>Scroll to begin</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</header>
+
+<!-- Step 1: The Steel -->
+<section class="section fade-in" id="step1">
+  <div class="step-number">01</div>
+  <h2>Choosing the Steel</h2>
+  <p>
+    Every sword starts with the right piece of metal. Bladesmiths use <span class="highlight">high-carbon steel</span> —
+    a type of steel that contains around 0.5% to 0.8% carbon. That extra carbon is what lets the blade
+    get hard enough to hold a sharp edge without snapping in half.
+  </p>
+  <img src="img_steel.jpg" alt="Raw steel billets on a blacksmith's workbench with a forge glowing in the background" class="section-image">
+  <div class="image-caption">Raw steel billets awaiting the forge</div>
+  <p>
+    Different traditions use different steels. Japanese swordsmiths used <span class="highlight">tamahagane</span> —
+    steel smelted from iron sand in a clay furnace over three days. European smiths preferred bloomery iron
+    that they would fold and weld to even out impurities. Today, most bladesmiths order specific steel
+    alloys like 1075 or 1095 from suppliers.
+  </p>
+  <div class="callout">
+    <strong>Why carbon matters:</strong> Pure iron is soft — you can bend it with your hands.
+    Add carbon and it becomes steel, which can be hardened through heat treatment.
+    Too little carbon and the blade won't hold an edge. Too much and it becomes brittle like glass.
+  </div>
+</section>
+
+<!-- Step 2: Forging -->
+<section class="section fade-in" id="step2">
+  <div class="step-number">02</div>
+  <h2>Forging the Blade</h2>
+  <p>
+    The steel bar goes into the forge — a furnace that heats it to around <span class="highlight">1,100°C (2,000°F)</span>,
+    turning it bright orange-yellow. At this temperature, the steel becomes soft enough to shape with a hammer.
+  </p>
+  <img src="img_forging.jpg" alt="Blacksmith hammering a glowing orange sword blade on an anvil, sparks flying" class="section-image">
+  <div class="image-caption">Shaping the blade under the hammer</div>
+  <p>
+    The smith pulls the glowing steel from the forge with tongs and hammers it on an anvil,
+    gradually drawing it out longer and thinner. They shape the blade's taper (thinner at the tip),
+    set the bevels (the angled edges), and form the tang — the narrow extension that will go inside the handle.
+  </p>
+  <p>
+    This isn't a one-shot process. The steel cools quickly, so the smith has to reheat it many times,
+    hammering a little more each time. A single sword might take <span class="highlight">hundreds of heats</span>
+    to get the shape right.
+  </p>
+  <div class="callout">
+    <strong>Fun fact:</strong> The classic "sparks flying" you see when a smith hammers hot steel?
+    Those are tiny pieces of iron oxide (scale) breaking off the surface. The brighter the sparks,
+    the higher the carbon content in the steel.
+  </div>
+</section>
+
+<!-- Step 3: Heat Treatment -->
+<section class="section fade-in" id="step3">
+  <div class="step-number">03</div>
+  <h2>Heat Treatment — The Critical Moment</h2>
+  <p>
+    This is the step that separates a shaped piece of metal from an actual sword. Heat treatment
+    transforms the steel's internal structure, making it <span class="highlight">hard enough to cut</span>
+    while still being <span class="highlight">tough enough not to shatter</span>.
+  </p>
+  <img src="img_quench.jpg" alt="A glowing red-hot sword blade being plunged into quenching oil, steam rising dramatically" class="section-image">
+  <div class="image-caption">The quench — plunging hot steel into oil to harden it</div>
+  <p>
+    First comes <span class="highlight">hardening</span>. The blade is heated to a precise temperature
+    (around 800°C) and then rapidly cooled by plunging it into oil or water. This "quench" locks the
+    steel's crystal structure into a super-hard form called martensite.
+  </p>
+  <p>
+    But here's the catch: fully hardened steel is too brittle — drop it and it could crack like ceramic.
+    So the smith follows up with <span class="highlight">tempering</span>: reheating the blade to a lower
+    temperature (200–300°C) to let some of that hardness relax. The result is a blade that's hard at the
+    edge but flexible enough to absorb impact.
+  </p>
+  <div class="callout">
+    <strong>The Japanese method:</strong> Katana makers coat the spine of the blade with clay before quenching.
+    The clay insulates the spine so it cools slowly (staying tough and flexible) while the exposed edge cools
+    fast (getting extremely hard). This creates the famous wavy line on the blade called a <em>hamon</em>.
+  </div>
+</section>
+
+<!-- Step 4: Grinding & Polishing -->
+<section class="section fade-in" id="step4">
+  <div class="step-number">04</div>
+  <h2>Grinding &amp; Polishing</h2>
+  <p>
+    After heat treatment, the blade looks rough — covered in dark scale and still thick at the edges.
+    Now the smith turns it into something sharp and beautiful.
+  </p>
+  <img src="img_grinding.jpg" alt="Sword blade being ground on a grinding wheel, bright sparks streaming off the edge" class="section-image">
+  <div class="image-caption">Grinding the edge — where the blade truly comes to life</div>
+  <p>
+    Using a <span class="highlight">belt grinder</span> or grinding wheel, the smith carefully grinds
+    the blade's bevels to their final geometry. This is where the actual cutting edge takes shape.
+    The angle of the bevel determines how the sword cuts — a thin edge slices easily but chips more,
+    while a thicker edge is tougher but needs more force.
+  </p>
+  <p>
+    After grinding, the blade goes through <span class="highlight">progressive polishing</span> —
+    starting with coarse abrasives and working up to finer and finer grits. A well-polished sword
+    can reach a near-mirror finish. Japanese sword polishing is an art form of its own, using
+    natural stones and taking weeks of careful hand work.
+  </p>
+</section>
+
+<!-- Step 5: Handle & Assembly -->
+<section class="section fade-in" id="step5">
+  <div class="step-number">05</div>
+  <h2>Handle, Guard &amp; Final Assembly</h2>
+  <p>
+    A blade without a handle is just a dangerous piece of metal. The final stage brings all the
+    components together into a complete, functional sword.
+  </p>
+  <img src="img_finished.jpg" alt="A beautifully finished medieval longsword displayed on a dark table, showing the complete craftsmanship" class="section-image">
+  <div class="image-caption">The finished blade — steel transformed into art</div>
+  <p>
+    The <span class="highlight">guard</span> (or crossguard) is fitted first — it protects your hand
+    from an opponent's blade sliding down onto your fingers. Then comes the <span class="highlight">grip</span>,
+    usually made from wood shaped to fit the tang, wrapped in leather or cord for a secure hold.
+  </p>
+  <p>
+    Finally, the <span class="highlight">pommel</span> caps the end of the handle. It's not just decoration —
+    it acts as a counterweight that balances the blade, making the sword feel lighter and more
+    maneuverable in the hand. The pommel is often threaded or peened (hammered) onto the tang to
+    hold everything together.
+  </p>
+  <div class="callout">
+    <strong>The balance point:</strong> A well-made sword balances about 3–4 inches ahead of the guard.
+    This "point of balance" determines how the sword feels when you swing it.
+    Too blade-heavy and it's sluggish; too handle-heavy and it won't cut with authority.
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="brand">The Art of the Blade</div>
+  <p>An illustrated guide &mdash; images generated with AI</p>
+</footer>
+
+<script>
+  // Smooth scroll for nav dots
+  function scrollTo(selector) {
+    document.querySelector(selector).scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Fade-in on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Active nav dot tracking
+  const sections = ['#hero', '#step1', '#step2', '#step3', '#step4', '#step5'];
+  const dots = document.querySelectorAll('.nav-dot');
+
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = sections.indexOf('#' + entry.target.id);
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }
+    });
+  }, { threshold: 0.4 });
+
+  sections.forEach(s => {
+    const el = document.querySelector(s);
+    if (el) sectionObserver.observe(el);
+  });
+</script>
+</body>
+</html>

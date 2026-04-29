@@ -1,0 +1,3632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khotun Khan - Wrath of the Steppe</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;700;900&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0a; overflow: hidden; font-family: 'Cinzel', 'Segoe UI', serif; user-select: none; }
+canvas { display: block; margin: 0 auto; cursor: crosshair; }
+
+#hud {
+  position: fixed; top: 20px; left: 20px; right: 20px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  pointer-events: none; z-index: 10;
+}
+.hud-panel {
+  background: linear-gradient(135deg, rgba(15,10,5,0.85), rgba(30,20,10,0.75));
+  border: 2px solid #c8a44e; border-radius: 10px; padding: 12px 20px;
+  color: #f0e6c8; font-size: 15px; text-shadow: 1px 1px 3px #000;
+  box-shadow: 0 0 20px rgba(200,164,78,0.15), inset 0 0 15px rgba(0,0,0,0.3);
+}
+.hud-panel strong { font-family: 'Cinzel Decorative', serif; letter-spacing: 2px; color: #e8d5a0; }
+#health-bar-container {
+  width: 260px; height: 20px; background: #1a0808;
+  border: 2px solid #8a6a2e; border-radius: 10px; overflow: hidden; margin-top: 6px;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+}
+#health-bar {
+  width: 100%; height: 100%;
+  background: linear-gradient(to right, #aa1111, #ee3333, #ff5555);
+  border-radius: 8px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(255,50,50,0.4);
+}
+#wave-info { text-align: right; }
+#kill-count { color: #ff7744; font-weight: bold; }
+#wave-num { color: #ffcc44; font-weight: bold; font-size: 22px; font-family: 'Cinzel Decorative', serif; }
+#score-display { color: #c8a44e; }
+
+#start-screen, #win-screen, #lose-screen {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; z-index: 100;
+  color: #f0e6c8; text-align: center;
+}
+#start-screen { background: transparent; }
+#win-screen, #lose-screen { background: rgba(0,0,0,0.88); }
+
+.title-main {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 80px; font-weight: 900;
+  background: linear-gradient(180deg, #ffe8a0, #c8a44e 40%, #8a5a1e 70%, #c8a44e);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 30px rgba(200,164,78,0.6)) drop-shadow(0 4px 8px rgba(0,0,0,0.8));
+  letter-spacing: 6px;
+  animation: titlePulse 3s ease-in-out infinite;
+}
+@keyframes titlePulse {
+  0%, 100% { filter: drop-shadow(0 0 30px rgba(200,164,78,0.6)) drop-shadow(0 4px 8px rgba(0,0,0,0.8)); }
+  50% { filter: drop-shadow(0 0 50px rgba(255,200,100,0.8)) drop-shadow(0 4px 8px rgba(0,0,0,0.8)); }
+}
+.title-sub {
+  font-family: 'Cinzel', serif;
+  font-size: 28px; color: #cc5522; letter-spacing: 12px;
+  text-shadow: 0 0 20px rgba(204,85,34,0.5), 0 2px 4px #000;
+  margin-top: 5px; margin-bottom: 35px;
+  text-transform: uppercase;
+}
+.title-divider {
+  width: 400px; height: 2px; margin: 0 auto 25px;
+  background: linear-gradient(to right, transparent, #c8a44e, transparent);
+}
+.title-lore {
+  font-size: 17px; color: #bba880; max-width: 500px; line-height: 1.6;
+  font-style: italic;
+}
+.title-controls {
+  margin-top: 20px; font-size: 13px; color: #776644; letter-spacing: 1px;
+}
+.title-controls span { color: #c8a44e; font-weight: bold; }
+
+.btn {
+  margin-top: 35px; padding: 16px 60px; font-size: 24px;
+  font-family: 'Cinzel Decorative', serif;
+  background: linear-gradient(180deg, #d4b05c, #a07830, #d4b05c);
+  border: 2px solid #ffe8a0;
+  border-radius: 6px; color: #1a0a00;
+  cursor: pointer; font-weight: 900; pointer-events: all;
+  text-transform: uppercase; letter-spacing: 4px;
+  box-shadow: 0 0 25px rgba(200,164,78,0.3), 0 4px 15px rgba(0,0,0,0.5);
+  transition: all 0.15s;
+}
+.btn:hover { transform: scale(1.06); box-shadow: 0 0 40px rgba(255,200,100,0.5), 0 4px 15px rgba(0,0,0,0.5); }
+.btn:active { transform: scale(0.97); }
+
+#win-screen h1 {
+  font-family: 'Cinzel Decorative', serif; font-size: 64px;
+  background: linear-gradient(180deg, #ffe8a0, #c8a44e);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 30px rgba(255,200,100,0.6));
+}
+#lose-screen h1 {
+  font-family: 'Cinzel Decorative', serif; font-size: 64px;
+  color: #cc2222; text-shadow: 0 0 30px rgba(200,0,0,0.5);
+}
+#win-screen p, #lose-screen p { font-size: 18px; margin: 6px 0; color: #bbb; }
+
+#wave-announce {
+  position: fixed; top: 38%; left: 50%; transform: translate(-50%, -50%);
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 52px; color: #ffcc44; font-weight: 900;
+  text-shadow: 0 0 40px rgba(255,204,68,0.7), 0 0 80px rgba(255,150,0,0.3), 2px 3px 6px #000;
+  z-index: 50; pointer-events: none; opacity: 0;
+  transition: opacity 0.4s;
+  letter-spacing: 4px;
+}
+#combo-display {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 30px; color: #ff8844; font-weight: 700;
+  text-shadow: 0 0 20px rgba(255,136,68,0.6);
+  z-index: 50; pointer-events: none; opacity: 0;
+}
+#controls-hint {
+  position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+  color: #554433; font-size: 12px; z-index: 10; pointer-events: none; letter-spacing: 1px;
+}
+
+/* Boss HP bar at bottom of screen */
+#boss-bar {
+  position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+  width: 500px; z-index: 20; pointer-events: none; display: none; text-align: center;
+}
+#boss-bar .boss-name {
+  font-family: 'Cinzel Decorative', serif; font-size: 18px;
+  color: #88aaff; letter-spacing: 3px; margin-bottom: 4px;
+  text-shadow: 0 0 15px rgba(136,170,255,0.5);
+}
+#boss-bar .boss-hp-bg {
+  width: 100%; height: 14px; background: #1a0a0a;
+  border: 2px solid #556688; border-radius: 7px; overflow: hidden;
+}
+#boss-bar .boss-hp-fill {
+  width: 100%; height: 100%;
+  background: linear-gradient(to right, #4466aa, #6688cc, #88aaff);
+  border-radius: 5px; transition: width 0.3s;
+}
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+<canvas id="title-canvas" style="position:fixed;top:0;left:0;z-index:99;pointer-events:none;"></canvas>
+
+<div id="hud" style="display:none;">
+  <div class="hud-panel">
+    <div><strong>KHOTUN KHAN</strong></div>
+    <div id="health-bar-container"><div id="health-bar"></div></div>
+    <div style="margin-top:4px; font-size:12px;">HP: <span id="hp-text">150/150</span></div>
+    <div style="margin-top:3px; font-size:12px; color:#44ff88;">Heals [Q]: <span id="heal-charges">4</span>/4</div>
+  </div>
+  <div class="hud-panel" id="wave-info">
+    <div>Wave <span id="wave-num">1</span> / 30</div>
+    <div style="margin-top:4px;">Kills: <span id="kill-count">0</span></div>
+    <div style="margin-top:2px;">Score: <span id="score-display">0</span></div>
+  </div>
+</div>
+
+<div id="boss-bar">
+  <div class="boss-name">JIN SAKAI — THE GHOST</div>
+  <div class="boss-hp-bg"><div class="boss-hp-fill" id="boss-hp-fill"></div></div>
+</div>
+
+<div id="wave-announce"></div>
+<div id="combo-display"></div>
+<div id="controls-hint"><span style="color:#998866">WASD</span> Move &bull; <span style="color:#998866">Click/Space</span> Attack &bull; <span style="color:#998866">E/Shift</span> Dash &bull; <span style="color:#44ff88">Q</span> Heal &bull; <span style="color:#998866">ESC</span> Menu &bull; <span style="color:#998866">F</span> Fullscreen</div>
+
+<div id="start-screen">
+  <div class="title-main">KHOTUN KHAN</div>
+  <div class="title-sub">Wrath of the Steppe</div>
+  <div class="title-divider"></div>
+  <div class="title-lore">
+    "From the endless grasslands he rose — Khotun Khan, the warrior king.
+    Now the samurai hordes stand between him and glory."
+  </div>
+  <div class="title-controls">
+    <span>WASD</span> to move &bull; <span>Click</span> or <span>Space</span> to attack &bull; <span>E</span> to dash &bull; <span style="color:#44ff88">Q</span> to heal
+  </div>
+  <button class="btn" onclick="startGame()">CONQUER</button>
+</div>
+
+<div id="win-screen" style="display:none;">
+  <h1>VICTORY</h1>
+  <p style="margin-top:10px;">Khotun Khan has conquered all 30 waves.</p>
+  <p>Jin Sakai, The Ghost, has been slain.</p>
+  <p style="margin-top:15px;">Final Score: <span id="final-score" style="color:#ffcc44; font-size:28px; font-family:'Cinzel Decorative',serif;">0</span></p>
+  <button class="btn" onclick="startGame()">FIGHT AGAIN</button>
+</div>
+
+<div id="lose-screen" style="display:none;">
+  <h1>DEFEATED</h1>
+  <p style="margin-top:10px;">Khotun Khan has fallen in battle...</p>
+  <p>Reached Wave: <span id="death-wave" style="color:#ffcc44;">1</span></p>
+  <p>Score: <span id="death-score" style="color:#ffcc44;">0</span></p>
+  <button class="btn" onclick="startGame()">RISE AGAIN</button>
+</div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const titleCanvas = document.getElementById('title-canvas');
+const tctx = titleCanvas.getContext('2d');
+
+// Offscreen bloom canvas for glow effects
+const bloomCanvas = document.createElement('canvas');
+const bloomCtx = bloomCanvas.getContext('2d');
+
+function resize() {
+  canvas.width = titleCanvas.width = bloomCanvas.width = window.innerWidth;
+  canvas.height = titleCanvas.height = bloomCanvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+let game = null;
+let keys = {};
+let mouse = { x: 0, y: 0, down: false };
+let animFrame = null;
+let screenShake = 0;
+let shakeX = 0, shakeY = 0;
+let globalTime = 0;
+
+// Realistic rendering helpers
+const RealGFX = {
+  // Soft ambient occlusion circle under characters
+  drawAO(ctx, x, y, radius) {
+    const ao = ctx.createRadialGradient(x, y+32, 2, x, y+32, radius);
+    ao.addColorStop(0, 'rgba(0,0,0,0.55)');
+    ao.addColorStop(0.3, 'rgba(0,0,0,0.3)');
+    ao.addColorStop(0.6, 'rgba(0,0,0,0.12)');
+    ao.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = ao;
+    ctx.beginPath(); ctx.ellipse(x, y+32, radius, radius*0.35, 0, 0, Math.PI*2); ctx.fill();
+  },
+  // Subsurface scattering glow on skin (warm light passes through)
+  skinSSS(ctx, x, y, radius) {
+    ctx.globalAlpha = 0.08;
+    const sss = ctx.createRadialGradient(x-2, y-2, 0, x, y, radius);
+    sss.addColorStop(0, '#ffaa66');
+    sss.addColorStop(0.5, '#ff885522');
+    sss.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = sss;
+    ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+  },
+  // Metallic specular highlight that tracks the sun
+  metalSpecular(ctx, x, y, w, h, intensity) {
+    const sunAngle = globalTime * 0.1;
+    const specX = x + Math.sin(sunAngle) * w * 0.2;
+    const specY = y - h * 0.3;
+    ctx.globalAlpha = intensity || 0.15;
+    const spec = ctx.createRadialGradient(specX, specY, 0, specX, specY, Math.max(w, h) * 0.6);
+    spec.addColorStop(0, '#ffffff');
+    spec.addColorStop(0.3, 'rgba(255,240,200,0.5)');
+    spec.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = spec;
+    ctx.beginPath(); ctx.ellipse(specX, specY, w*0.5, h*0.3, 0, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+  },
+  // Cloth wrinkle overlay with depth
+  clothWrinkles(ctx, x, y, w, h, color, count) {
+    ctx.strokeStyle = color || 'rgba(0,0,0,0.08)';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < (count || 4); i++) {
+      const wy = y + (i / count) * h;
+      const curve = Math.sin(i * 2.1 + x * 0.01) * 2;
+      ctx.beginPath();
+      ctx.moveTo(x - w/2, wy);
+      ctx.quadraticCurveTo(x + curve, wy + 1.5, x + w/2, wy);
+      ctx.stroke();
+    }
+  },
+  // Blood splatter on hit
+  bloodSplat(particles, x, y, count) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 50 + Math.random() * 150;
+      particles.push(new Particle(
+        x, y, `rgba(${140+Math.random()*60},${Math.random()*20},${Math.random()*15},0.7)`,
+        Math.cos(angle) * speed, Math.sin(angle) * speed - 30,
+        0.3 + Math.random() * 0.3, 1 + Math.random() * 2.5, 80
+      ));
+    }
+  },
+  // Weapon trail with motion blur
+  weaponTrail(ctx, points, color, width) {
+    if (points.length < 2) return;
+    for (let i = 1; i < points.length; i++) {
+      const alpha = i / points.length;
+      ctx.strokeStyle = color.replace('ALPHA', (alpha * 0.4).toFixed(2));
+      ctx.lineWidth = width * alpha;
+      ctx.beginPath();
+      ctx.moveTo(points[i-1].x, points[i-1].y);
+      ctx.lineTo(points[i].x, points[i].y);
+      ctx.stroke();
+    }
+  }
+};
+
+let justPressed = {};
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (!keys[k]) justPressed[k] = true;
+  keys[k] = true;
+  if (e.key === ' ') e.preventDefault();
+  if (e.key === 'Escape' && game && game.state === 'playing') goToMenu();
+  if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey) {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+});
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+window.addEventListener('mousedown', e => { mouse.down = true; });
+window.addEventListener('mouseup', e => { mouse.down = false; });
+
+// ==================== TITLE SCREEN ANIMATION ====================
+let titleEmbers = [];
+let titleActive = true;
+
+function initTitleEmbers() {
+  titleEmbers = [];
+  for (let i = 0; i < 60; i++) {
+    titleEmbers.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 30,
+      vy: -20 - Math.random() * 60,
+      size: 1 + Math.random() * 3,
+      life: Math.random(),
+      maxLife: 2 + Math.random() * 3,
+      color: ['#ff8833', '#ffaa44', '#ff6622', '#cc5500', '#ffcc66'][Math.floor(Math.random()*5)]
+    });
+  }
+}
+initTitleEmbers();
+
+function drawTitleBg(dt) {
+  tctx.clearRect(0, 0, titleCanvas.width, titleCanvas.height);
+
+  // Tsushima sunset sky
+  const grad = tctx.createLinearGradient(0, 0, 0, titleCanvas.height);
+  grad.addColorStop(0, '#0a0810');
+  grad.addColorStop(0.2, '#1a1028');
+  grad.addColorStop(0.4, '#3a1a20');
+  grad.addColorStop(0.55, '#6a3020');
+  grad.addColorStop(0.65, '#aa5530');
+  grad.addColorStop(0.7, '#cc7030');
+  grad.addColorStop(0.75, '#3a2818');
+  grad.addColorStop(1, '#1a1008');
+  tctx.fillStyle = grad;
+  tctx.fillRect(0, 0, titleCanvas.width, titleCanvas.height);
+
+  // Sun glow on horizon
+  const sunGr = tctx.createRadialGradient(
+    titleCanvas.width * 0.5, titleCanvas.height * 0.68, 10,
+    titleCanvas.width * 0.5, titleCanvas.height * 0.68, 200
+  );
+  sunGr.addColorStop(0, 'rgba(255,180,60,0.4)');
+  sunGr.addColorStop(0.3, 'rgba(220,120,30,0.15)');
+  sunGr.addColorStop(0.6, 'rgba(180,60,20,0.05)');
+  sunGr.addColorStop(1, 'rgba(0,0,0,0)');
+  tctx.fillStyle = sunGr;
+  tctx.fillRect(0, 0, titleCanvas.width, titleCanvas.height);
+
+  // Distant mountains (layered, misty)
+  // Far mountains
+  tctx.fillStyle = '#2a1818';
+  tctx.beginPath();
+  tctx.moveTo(0, titleCanvas.height * 0.6);
+  for (let x = 0; x <= titleCanvas.width; x += 30) {
+    tctx.lineTo(x, titleCanvas.height * 0.6 - Math.sin(x * 0.002 + 0.5) * 80 - Math.sin(x * 0.006) * 35);
+  }
+  tctx.lineTo(titleCanvas.width, titleCanvas.height);
+  tctx.lineTo(0, titleCanvas.height);
+  tctx.fill();
+  // Near mountains
+  tctx.fillStyle = '#1a1008';
+  tctx.beginPath();
+  tctx.moveTo(0, titleCanvas.height * 0.65);
+  for (let x = 0; x <= titleCanvas.width; x += 25) {
+    tctx.lineTo(x, titleCanvas.height * 0.65 - Math.sin(x * 0.003 + 2) * 55 - Math.sin(x * 0.009) * 25);
+  }
+  tctx.lineTo(titleCanvas.width, titleCanvas.height);
+  tctx.lineTo(0, titleCanvas.height);
+  tctx.fill();
+
+  // Tree silhouettes on horizon
+  tctx.fillStyle = '#0a0805';
+  for (let x = 20; x < titleCanvas.width; x += 35 + Math.sin(x * 0.1) * 15) {
+    const treeY = titleCanvas.height * 0.65 - Math.sin(x * 0.003 + 2) * 55 - Math.sin(x * 0.009) * 25;
+    const treeH = 20 + Math.sin(x * 0.3) * 12;
+    // Pine tree shape
+    tctx.beginPath();
+    tctx.moveTo(x, treeY);
+    tctx.lineTo(x - 6, treeY);
+    tctx.lineTo(x - 2, treeY - treeH * 0.4);
+    tctx.lineTo(x - 5, treeY - treeH * 0.4);
+    tctx.lineTo(x - 1, treeY - treeH * 0.7);
+    tctx.lineTo(x - 3, treeY - treeH * 0.7);
+    tctx.lineTo(x, treeY - treeH);
+    tctx.lineTo(x + 3, treeY - treeH * 0.7);
+    tctx.lineTo(x + 1, treeY - treeH * 0.7);
+    tctx.lineTo(x + 5, treeY - treeH * 0.4);
+    tctx.lineTo(x + 2, treeY - treeH * 0.4);
+    tctx.lineTo(x + 6, treeY);
+    tctx.fill();
+  }
+
+  // Steppe grassland
+  tctx.fillStyle = '#221808';
+  tctx.beginPath();
+  tctx.moveTo(0, titleCanvas.height * 0.75);
+  for (let x = 0; x <= titleCanvas.width; x += 20) {
+    tctx.lineTo(x, titleCanvas.height * 0.75 - Math.sin(x * 0.005 + globalTime * 0.5) * 8);
+  }
+  tctx.lineTo(titleCanvas.width, titleCanvas.height);
+  tctx.lineTo(0, titleCanvas.height);
+  tctx.fill();
+
+  // Golden swaying grass
+  for (let x = 0; x < titleCanvas.width; x += 10) {
+    const baseY = titleCanvas.height * 0.75 - Math.sin(x * 0.005 + globalTime * 0.5) * 8;
+    const sway = Math.sin(x * 0.02 + globalTime * 2) * 8;
+    const h = 12 + Math.sin(x * 0.1) * 10;
+    const gb = Math.sin(x * 0.05) * 0.2;
+    tctx.strokeStyle = `rgba(${140 + Math.sin(x*0.04)*30},${100 + Math.sin(x*0.03)*20},${30},${0.35 + gb})`;
+    tctx.lineWidth = 1.5;
+    tctx.beginPath();
+    tctx.moveTo(x, baseY);
+    tctx.quadraticCurveTo(x + sway, baseY - h * 0.6, x + sway * 1.5, baseY - h);
+    tctx.stroke();
+  }
+
+  // Embers / sparks
+  for (const e of titleEmbers) {
+    e.x += e.vx * dt;
+    e.y += e.vy * dt;
+    e.life += dt;
+    if (e.life > e.maxLife || e.y < -20) {
+      e.x = Math.random() * titleCanvas.width;
+      e.y = titleCanvas.height * 0.8 + Math.random() * titleCanvas.height * 0.2;
+      e.life = 0;
+    }
+    const a = 1 - (e.life / e.maxLife);
+    tctx.globalAlpha = a * 0.8;
+    tctx.fillStyle = e.color;
+    tctx.beginPath();
+    tctx.arc(e.x, e.y, e.size * a, 0, Math.PI * 2);
+    tctx.fill();
+    // Glow
+    tctx.globalAlpha = a * 0.2;
+    tctx.beginPath();
+    tctx.arc(e.x, e.y, e.size * a * 3, 0, Math.PI * 2);
+    tctx.fill();
+  }
+  tctx.globalAlpha = 1;
+}
+
+// ==================== PARTICLES ====================
+class Particle {
+  constructor(x, y, color, vx, vy, life, size, grav) {
+    this.x = x; this.y = y; this.color = color;
+    this.vx = vx; this.vy = vy;
+    this.life = life; this.maxLife = life;
+    this.size = size || 3;
+    this.grav = grav !== undefined ? grav : 180;
+  }
+  update(dt) {
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.vy += this.grav * dt;
+    this.life -= dt;
+  }
+  draw(ctx) {
+    const a = Math.max(0, this.life / this.maxLife);
+    ctx.globalAlpha = a;
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size * (0.3 + a * 0.7), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+class FloatingText {
+  constructor(x, y, text, color, size) {
+    this.x = x; this.y = y; this.text = text; this.color = color;
+    this.life = 1.2; this.maxLife = 1.2;
+    this.fontSize = size || 20;
+  }
+  update(dt) { this.y -= 45 * dt; this.life -= dt; }
+  draw(ctx) {
+    const a = Math.max(0, this.life / this.maxLife);
+    ctx.globalAlpha = a;
+    ctx.fillStyle = this.color;
+    ctx.font = `bold ${this.fontSize}px Cinzel, serif`;
+    ctx.textAlign = 'center';
+    ctx.shadowColor = '#000';
+    ctx.shadowBlur = 4;
+    ctx.fillText(this.text, this.x, this.y);
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+  }
+}
+
+// ==================== PLAYER (Khotun Khan) ====================
+class Player {
+  constructor(x, y) {
+    this.x = x; this.y = y;
+    this.w = 54; this.h = 78;
+    this.hp = 135; this.maxHp = 135;
+    this.speed = 290;
+    this.attacking = false;
+    this.attackTimer = 0;
+    this.attackCooldown = 0;
+    this.attackRange = 85;
+    this.attackDamage = 32;
+    this.attackAngle = 0;
+    this.facingRight = true;
+    this.dashCooldown = 0;
+    this.dashTimer = 0;
+    this.dashDx = 0; this.dashDy = 0;
+    this.dashSpeed = 800;
+    this.dashDist = 0;
+    this.invincible = 0;
+    this.combo = 0;
+    this.comboTimer = 0;
+    this.swingFrame = 0;
+    this.walkCycle = 0;
+    this.moving = false;
+    this.trail = [];
+    this.healCharges = 4;
+    this.healCooldown = 0;
+    this.healAmount = 28;
+    this.healing = false;
+    this.healTimer = 0;
+  }
+
+  update(dt, game) {
+    this.moving = false;
+    if (this.dashTimer > 0) {
+      this.dashTimer -= dt;
+      const spd = this.dashSpeed || 800;
+      this.x += this.dashDx * spd * dt;
+      this.y += this.dashDy * spd * dt;
+      this.invincible = 0.15;
+      // Dash trail
+      this.trail.push({ x: this.x, y: this.y, life: 0.2 });
+      // Dust
+      game.particles.push(new Particle(
+        this.x + (Math.random()-0.5)*10, this.y + 25,
+        '#aa9966', (Math.random()-0.5)*40, -10 - Math.random()*20,
+        0.3, 2 + Math.random()*2, 50
+      ));
+    } else {
+      let dx = 0, dy = 0;
+      if (keys['w'] || keys['arrowup']) dy -= 1;
+      if (keys['s'] || keys['arrowdown']) dy += 1;
+      if (keys['a'] || keys['arrowleft']) dx -= 1;
+      if (keys['d'] || keys['arrowright']) dx += 1;
+      if (dx || dy) {
+        const len = Math.sqrt(dx*dx + dy*dy);
+        dx /= len; dy /= len;
+        this.x += dx * this.speed * dt;
+        this.y += dy * this.speed * dt;
+        if (dx !== 0) this.facingRight = dx > 0;
+        this.moving = true;
+        this.walkCycle += dt * 10;
+        // Subtle dust
+        if (Math.random() < 0.3) {
+          game.particles.push(new Particle(
+            this.x + (Math.random()-0.5)*8, this.y + 26,
+            '#88774433', (Math.random()-0.5)*15, -5,
+            0.4, 1.5, 20
+          ));
+        }
+      }
+      if ((keys['e'] || keys['shift']) && this.dashCooldown <= 0) {
+        // Dash toward mouse cursor
+        let ddx = mouse.x - this.x;
+        let ddy = mouse.y - this.y;
+        const len = Math.hypot(ddx, ddy);
+        if (len > 1) {
+          this.dashDx = ddx/len; this.dashDy = ddy/len;
+        } else {
+          this.dashDx = this.facingRight ? 1 : -1; this.dashDy = 0;
+        }
+        // Dash distance scales with how far the mouse is (capped)
+        this.dashDist = Math.min(len, 300);
+        this.dashSpeed = Math.max(800, this.dashDist / 0.2);
+        this.dashTimer = this.dashDist / this.dashSpeed;
+        this.dashCooldown = 0.6;
+      }
+    }
+
+    // Trail fade
+    this.trail = this.trail.filter(t => { t.life -= dt; return t.life > 0; });
+
+    if (this.dashCooldown > 0) this.dashCooldown -= dt;
+    if (this.invincible > 0) this.invincible -= dt;
+
+    this.x = Math.max(this.w, Math.min(canvas.width - this.w, this.x));
+    this.y = Math.max(this.h, Math.min(canvas.height - this.h, this.y));
+
+    if (this.attackCooldown > 0) this.attackCooldown -= dt;
+    if ((mouse.down || keys[' ']) && this.attackCooldown <= 0 && !this.attacking) {
+      this.attacking = true;
+      this.attackTimer = 0.22;
+      this.attackCooldown = 0.28;   // FASTER ATTACK
+      this.attackAngle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
+      this.swingFrame = 0;
+      this.doAttack(game);
+      screenShake = 0.05;
+    }
+    if (this.attacking) {
+      this.attackTimer -= dt;
+      this.swingFrame += dt;
+      if (this.attackTimer <= 0) this.attacking = false;
+    }
+    if (this.comboTimer > 0) {
+      this.comboTimer -= dt;
+      if (this.comboTimer <= 0) this.combo = 0;
+    }
+
+    // Heal (Q key)
+    if (this.healCooldown > 0) this.healCooldown -= dt;
+    if (this.healTimer > 0) {
+      this.healTimer -= dt;
+      if (this.healTimer <= 0) this.healing = false;
+    }
+    if (justPressed['q'] && this.healCooldown <= 0 && this.healCharges > 0) {
+      this.healCharges--;
+      this.healCooldown = 3;
+      const actualHeal = Math.min(this.healAmount, this.maxHp - this.hp);
+      this.hp = Math.min(this.maxHp, this.hp + this.healAmount);
+      this.healing = true;
+      this.healTimer = 0.5;
+      game.floatingTexts.push(new FloatingText(this.x, this.y - 65, `+${actualHeal > 0 ? actualHeal : this.healAmount} HP`, '#44ff88', 24));
+      // Green heal particles
+      for (let i = 0; i < 12; i++) {
+        game.particles.push(new Particle(
+          this.x + (Math.random()-0.5)*30, this.y + (Math.random()-0.5)*30,
+          ['#44ff88','#22cc66','#88ffaa'][i%3],
+          (Math.random()-0.5)*60, -40 - Math.random()*60,
+          0.5 + Math.random()*0.3, 2 + Math.random()*2, -30
+        ));
+      }
+    }
+  }
+
+  doAttack(game) {
+    const ax = this.x + Math.cos(this.attackAngle) * 45;
+    const ay = this.y + Math.sin(this.attackAngle) * 45;
+    let hitAny = false;
+    for (const e of game.enemies) {
+      const dist = Math.hypot(e.x - ax, e.y - ay);
+      if (dist < this.attackRange) {
+        const dmg = this.attackDamage + this.combo * 4;
+        e.hp -= dmg;
+        e.hitFlash = 0.15;
+        e.knockbackX = Math.cos(this.attackAngle) * 250;
+        e.knockbackY = Math.sin(this.attackAngle) * 250;
+        e.knockbackTimer = 0.15;
+        hitAny = true;
+        game.floatingTexts.push(new FloatingText(e.x, e.y - 30, `-${dmg}`, '#ff4444'));
+        screenShake = 0.08;
+        // Hit blood splatter
+        RealGFX.bloodSplat(game.particles, e.x, e.y - 5, 4);
+        for (let i = 0; i < 8; i++) {
+          game.particles.push(new Particle(
+            e.x, e.y, ['#cc2222','#ff4444','#881111'][i%3],
+            (Math.random()-0.5)*250 + Math.cos(this.attackAngle)*120,
+            (Math.random()-0.5)*250 - 60,
+            0.4 + Math.random()*0.3, 2 + Math.random()*3
+          ));
+        }
+        if (e.hp <= 0) {
+          game.kills++;
+          const killScore = e.isBoss ? 2000 : 100 + this.combo * 50;
+          game.score += killScore;
+          game.floatingTexts.push(new FloatingText(e.x, e.y - 50,
+            e.isBoss ? 'BOSS DEFEATED! +2000' : `+${killScore}`,
+            e.isBoss ? '#88aaff' : '#ffcc44', e.isBoss ? 28 : 20));
+          screenShake = e.isBoss ? 0.4 : 0.12;
+          // Death blood burst
+          RealGFX.bloodSplat(game.particles, e.x, e.y, e.isBoss ? 20 : 12);
+          for (let i = 0; i < (e.isBoss ? 30 : 15); i++) {
+            const c = e.isBoss ? ['#4466cc','#88aaff','#ff4444'][i%3] : ['#cc2222','#881111','#aa0000'][i%3];
+            game.particles.push(new Particle(
+              e.x, e.y, c,
+              (Math.random()-0.5)*400, (Math.random()-0.5)*400 - 100,
+              0.5 + Math.random()*0.5, 3 + Math.random()*5
+            ));
+          }
+        }
+      }
+    }
+    if (hitAny) { this.combo++; this.comboTimer = 2.5; }
+    // Slash VFX
+    for (let i = 0; i < 8; i++) {
+      const a = this.attackAngle + (Math.random()-0.5)*1.0;
+      const d = 25 + Math.random()*55;
+      game.particles.push(new Particle(
+        this.x + Math.cos(a)*d, this.y + Math.sin(a)*d,
+        i%2===0 ? '#ffe088' : '#ffcc44',
+        Math.cos(a)*120, Math.sin(a)*120,
+        0.15 + Math.random()*0.1, 1.5 + Math.random(), 0
+      ));
+    }
+  }
+
+  takeDamage(dmg, game) {
+    if (this.invincible > 0) return;
+    this.hp -= dmg;
+    this.invincible = 0.6;
+    screenShake = 0.1;
+    game.floatingTexts.push(new FloatingText(this.x, this.y - 40, `-${dmg}`, '#ff6666'));
+    // Blood splatter
+    RealGFX.bloodSplat(game.particles, this.x, this.y - 10, 5);
+    if (this.combo >= 4) {
+      const heal = 5;
+      this.hp = Math.min(this.maxHp, this.hp + heal);
+      game.floatingTexts.push(new FloatingText(this.x + 25, this.y - 55, `+${heal}`, '#44ff44'));
+    }
+    if (this.hp <= 0) { this.hp = 0; game.state = 'lose'; }
+  }
+
+  draw(ctx) {
+    const S = 1.5; // scale factor for realistic proportions
+    // Dash trail ghosts
+    for (const t of this.trail) {
+      ctx.globalAlpha = t.life * 1.5;
+      const tg = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, 28*S);
+      tg.addColorStop(0, 'rgba(140,160,200,0.4)');
+      tg.addColorStop(1, 'rgba(140,160,200,0)');
+      ctx.fillStyle = tg;
+      ctx.beginPath();
+      ctx.ellipse(t.x, t.y, 22*S, 36*S, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    const flash = this.invincible > 0 && Math.floor(this.invincible * 16) % 2;
+    if (flash) ctx.globalAlpha = 0.4;
+
+    const dir = this.facingRight ? 1 : -1;
+    const bob = this.moving ? Math.sin(this.walkCycle) * 3 : 0;
+    const by = this.y + bob;
+
+    // === GROUND SHADOW (realistic soft ellipse) ===
+    const shGrad = ctx.createRadialGradient(this.x, this.y + 44*S, 3, this.x, this.y + 44*S, 42*S);
+    shGrad.addColorStop(0, 'rgba(0,0,0,0.6)');
+    shGrad.addColorStop(0.4, 'rgba(0,0,0,0.3)');
+    shGrad.addColorStop(0.7, 'rgba(0,0,0,0.1)');
+    shGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = shGrad;
+    ctx.beginPath();
+    ctx.ellipse(this.x, this.y + 44*S, 42*S, 14*S, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // === FUR CLOAK (behind body) — massive fur mantle ===
+    const furSway = Math.sin(globalTime * 2) * 3;
+    for (const side of [-1, 1]) {
+      // Multiple layers of fur for depth
+      for (let layer = 0; layer < 3; layer++) {
+        const layerOff = layer * 2;
+        const furGrad = ctx.createLinearGradient(this.x, by - 26*S, this.x + 34*S*side, by + 8*S);
+        furGrad.addColorStop(0, layer === 0 ? '#1a0e05' : layer === 1 ? '#2a1a0a' : '#3a2810');
+        furGrad.addColorStop(0.4, '#2a1a0a');
+        furGrad.addColorStop(0.7, '#1a0e05');
+        furGrad.addColorStop(1, '#0a0502');
+        ctx.fillStyle = furGrad;
+        ctx.beginPath();
+        ctx.moveTo(this.x + 12*S*side, by - 26*S + layerOff);
+        ctx.bezierCurveTo(this.x + 36*S*side, by - 24*S + layerOff, this.x + 42*S*side + furSway*side, by - 8*S, this.x + 36*S*side + furSway*side, by + 12*S);
+        ctx.lineTo(this.x + 24*S*side, by + 8*S);
+        ctx.lineTo(this.x + 14*S*side, by - 18*S + layerOff);
+        ctx.fill();
+      }
+      // Detailed fur texture strands
+      for (let fi = 0; fi < 12; fi++) {
+        const fy = by - 24*S + fi * 3*S;
+        const fx = this.x + (20 + fi * 1.2)*S*side;
+        ctx.strokeStyle = `rgba(74,56,24,${0.4 + Math.sin(fi)*0.2})`;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(fx, fy);
+        ctx.quadraticCurveTo(fx + (3 + Math.sin(fi + globalTime)*2)*side, fy + 2*S, fx + (1 + Math.sin(fi*0.7 + globalTime)*1.5)*side, fy + 5*S);
+        ctx.stroke();
+      }
+      // Fur edge highlight (rim light)
+      ctx.strokeStyle = 'rgba(80,60,30,0.3)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(this.x + 12*S*side, by - 26*S);
+      ctx.bezierCurveTo(this.x + 36*S*side, by - 24*S, this.x + 42*S*side + furSway*side, by - 8*S, this.x + 36*S*side + furSway*side, by + 12*S);
+      ctx.stroke();
+    }
+
+    // === LEGS (dark cloth/leather with wrinkle detail) ===
+    const legSwing = this.moving ? Math.sin(this.walkCycle) * 5 : 0;
+    for (const side of [-1, 1]) {
+      ctx.save();
+      ctx.translate(this.x + 9*S*side, by + 18*S);
+      ctx.rotate(side * legSwing * 0.06);
+      // Main leg shape — tapered with muscle
+      const legGrad = ctx.createLinearGradient(-7*S, 0, 7*S, 0);
+      legGrad.addColorStop(0, '#1a1020');
+      legGrad.addColorStop(0.3, '#3a3040');
+      legGrad.addColorStop(0.5, '#453850');
+      legGrad.addColorStop(0.7, '#3a3040');
+      legGrad.addColorStop(1, '#1a1020');
+      ctx.fillStyle = legGrad;
+      ctx.beginPath();
+      ctx.moveTo(-7*S, 0);
+      ctx.quadraticCurveTo(-8*S, 10*S, -6*S, 24*S);
+      ctx.lineTo(6*S, 24*S);
+      ctx.quadraticCurveTo(8*S, 10*S, 7*S, 0);
+      ctx.fill();
+      // Cloth wrinkle lines
+      ctx.strokeStyle = 'rgba(80,60,90,0.25)';
+      ctx.lineWidth = 0.7;
+      for (let w = 0; w < 4; w++) {
+        const wy = 4*S + w * 5*S;
+        ctx.beginPath();
+        ctx.moveTo(-5*S, wy);
+        ctx.quadraticCurveTo(0, wy + Math.sin(w)*2, 5*S, wy);
+        ctx.stroke();
+      }
+      // Knee highlight
+      ctx.fillStyle = 'rgba(80,70,100,0.15)';
+      ctx.beginPath();
+      ctx.ellipse(0, 10*S, 4*S, 3*S, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Boots — heavy Mongol leather with realistic detail
+    for (const side of [-1, 1]) {
+      const bx = this.x + (side === -1 ? -16*S : 2*S);
+      const bootGrad = ctx.createLinearGradient(bx, by + 40*S, bx + 14*S, by + 40*S);
+      bootGrad.addColorStop(0, '#1a0e05');
+      bootGrad.addColorStop(0.3, '#3a2a18');
+      bootGrad.addColorStop(0.6, '#4a3820');
+      bootGrad.addColorStop(1, '#2a1a0a');
+      ctx.fillStyle = bootGrad;
+      // Rounded boot shape
+      ctx.beginPath();
+      ctx.moveTo(bx, by + 38*S);
+      ctx.quadraticCurveTo(bx - 1*S, by + 48*S, bx + 2*S, by + 50*S);
+      ctx.lineTo(bx + 12*S, by + 50*S);
+      ctx.quadraticCurveTo(bx + 15*S, by + 48*S, bx + 14*S, by + 38*S);
+      ctx.fill();
+      // Boot sole
+      ctx.fillStyle = '#0a0502';
+      ctx.fillRect(bx + 1*S, by + 49*S, 12*S, 2*S);
+      // Boot seam
+      ctx.strokeStyle = 'rgba(90,70,40,0.4)';
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(bx + 7*S, by + 38*S);
+      ctx.lineTo(bx + 7*S, by + 49*S);
+      ctx.stroke();
+    }
+    // Boot fur trim — detailed
+    for (let i = -17; i < 17; i += 1.2) {
+      const fh = 3*S + Math.sin(i * 1.2) * 1.5;
+      ctx.fillStyle = `rgba(${60+Math.sin(i)*20},${45+Math.sin(i)*15},${25},${0.5 + Math.sin(i*2)*0.2})`;
+      ctx.fillRect(this.x + i*S*0.95, by + 36.5*S, 1.5, fh);
+    }
+
+    // === BODY — ornate Mongol deel (larger, more detail) ===
+    const bodyGrad = ctx.createLinearGradient(this.x - 22*S, by - 24*S, this.x + 22*S, by + 20*S);
+    bodyGrad.addColorStop(0, '#2a2838');
+    bodyGrad.addColorStop(0.2, '#3a3548');
+    bodyGrad.addColorStop(0.4, '#35304a');
+    bodyGrad.addColorStop(0.6, '#2a2535');
+    bodyGrad.addColorStop(0.8, '#222030');
+    bodyGrad.addColorStop(1, '#1a1825');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 22*S, by - 24*S);
+    ctx.lineTo(this.x + 22*S, by - 24*S);
+    ctx.quadraticCurveTo(this.x + 21*S, by + 8*S, this.x + 19*S, by + 20*S);
+    ctx.lineTo(this.x - 19*S, by + 20*S);
+    ctx.quadraticCurveTo(this.x - 21*S, by + 8*S, this.x - 22*S, by - 24*S);
+    ctx.fill();
+    // Fabric fold detail
+    ctx.strokeStyle = 'rgba(50,45,65,0.35)';
+    ctx.lineWidth = 1;
+    for (let f = 0; f < 5; f++) {
+      const fy = by - 18*S + f * 8*S;
+      ctx.beginPath();
+      ctx.moveTo(this.x - 18*S, fy);
+      ctx.quadraticCurveTo(this.x + Math.sin(f*2)*4*S, fy + 2*S, this.x + 18*S, fy);
+      ctx.stroke();
+    }
+
+    // Cross-chest leather straps (wider, with stitching)
+    for (let strap = 0; strap < 2; strap++) {
+      const sDir = strap === 0 ? 1 : -1;
+      const strapGrad = ctx.createLinearGradient(this.x - 20*S*sDir, by - 18*S, this.x + 15*S*sDir, by + 12*S);
+      strapGrad.addColorStop(0, '#5a4a30');
+      strapGrad.addColorStop(0.5, '#6a5838');
+      strapGrad.addColorStop(1, '#4a3a28');
+      ctx.strokeStyle = strapGrad;
+      ctx.lineWidth = 4*S;
+      ctx.beginPath();
+      ctx.moveTo(this.x - 20*S*sDir, by - 18*S);
+      ctx.lineTo(this.x + 15*S*sDir, by + 12*S);
+      ctx.stroke();
+      // Strap stitching
+      ctx.strokeStyle = 'rgba(100,85,55,0.5)';
+      ctx.lineWidth = 0.5;
+      ctx.setLineDash([2, 3]);
+      ctx.beginPath();
+      ctx.moveTo(this.x - 19*S*sDir, by - 17*S);
+      ctx.lineTo(this.x + 14*S*sDir, by + 11*S);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // === CHEST ARMOR — ornate silver/steel with engravings ===
+    const armorGrad = ctx.createLinearGradient(this.x - 19*S, by - 24*S, this.x + 19*S, by - 3*S);
+    armorGrad.addColorStop(0, '#5a6878');
+    armorGrad.addColorStop(0.15, '#7a8a9a');
+    armorGrad.addColorStop(0.3, '#98a8b8');
+    armorGrad.addColorStop(0.45, '#b0c0d0');
+    armorGrad.addColorStop(0.55, '#c0d0e0');
+    armorGrad.addColorStop(0.65, '#b0c0d0');
+    armorGrad.addColorStop(0.8, '#8a9aaa');
+    armorGrad.addColorStop(1, '#5a6878');
+    ctx.fillStyle = armorGrad;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 19*S, by - 24*S);
+    ctx.quadraticCurveTo(this.x - 20*S, by - 14*S, this.x - 16*S, by - 3*S);
+    ctx.lineTo(this.x + 16*S, by - 3*S);
+    ctx.quadraticCurveTo(this.x + 20*S, by - 14*S, this.x + 19*S, by - 24*S);
+    ctx.fill();
+    // Metallic specular highlight on armor
+    RealGFX.metalSpecular(ctx, this.x, by - 14*S, 30*S, 20*S, 0.12);
+    // Ornate engraving swirls (more detailed)
+    ctx.strokeStyle = 'rgba(180,200,220,0.25)';
+    ctx.lineWidth = 0.8;
+    for (let row = 0; row < 5; row++) {
+      const ry = by - 22*S + row * 4*S;
+      ctx.beginPath();
+      for (let t = -15*S; t <= 15*S; t += 1) {
+        const px = this.x + t;
+        const py = ry + Math.sin(t * 0.3 + row * 1.2) * 2*S;
+        t === -15*S ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    }
+    // Armor rivets — polished silver with specular highlight
+    for (let row = 0; row < 4; row++) {
+      for (let rx = -12*S; rx <= 12*S; rx += 8*S) {
+        const rivX = this.x + rx, rivY = by - 21*S + row * 5*S;
+        // Rivet base
+        const rivGrad = ctx.createRadialGradient(rivX - 0.5, rivY - 0.5, 0.3, rivX, rivY, 2*S);
+        rivGrad.addColorStop(0, '#e0ecf8');
+        rivGrad.addColorStop(0.4, '#c0d0e0');
+        rivGrad.addColorStop(1, '#8090a0');
+        ctx.fillStyle = rivGrad;
+        ctx.beginPath(); ctx.arc(rivX, rivY, 1.8*S, 0, Math.PI*2); ctx.fill();
+        // Specular highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.beginPath(); ctx.arc(rivX - 0.5, rivY - 0.7, 0.7, 0, Math.PI*2); ctx.fill();
+      }
+    }
+    // Armor edge bevel (rim light)
+    ctx.strokeStyle = 'rgba(200,220,240,0.3)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 19*S, by - 24*S);
+    ctx.quadraticCurveTo(this.x - 20*S, by - 14*S, this.x - 16*S, by - 3*S);
+    ctx.stroke();
+
+    // === GOLDEN BELT with ornate buckle ===
+    const sashGrad = ctx.createLinearGradient(this.x - 20*S, by + 3*S, this.x + 20*S, by + 11*S);
+    sashGrad.addColorStop(0, '#6a5828');
+    sashGrad.addColorStop(0.15, '#8a7838');
+    sashGrad.addColorStop(0.35, '#b8a860');
+    sashGrad.addColorStop(0.5, '#d8c880');
+    sashGrad.addColorStop(0.65, '#b8a860');
+    sashGrad.addColorStop(0.85, '#8a7838');
+    sashGrad.addColorStop(1, '#6a5828');
+    ctx.fillStyle = sashGrad;
+    ctx.fillRect(this.x - 20*S, by + 3*S, 40*S, 7*S);
+    // Belt texture (worn leather)
+    ctx.strokeStyle = 'rgba(160,140,80,0.2)';
+    ctx.lineWidth = 0.5;
+    for (let bl = -18*S; bl < 18*S; bl += 3*S) {
+      ctx.beginPath();
+      ctx.moveTo(this.x + bl, by + 4*S);
+      ctx.lineTo(this.x + bl + 1*S, by + 9*S);
+      ctx.stroke();
+    }
+    // Ornate buckle — larger with gem
+    const buckGrad = ctx.createRadialGradient(this.x, by + 6.5*S, 1*S, this.x, by + 6.5*S, 7*S);
+    buckGrad.addColorStop(0, '#f0e0b0');
+    buckGrad.addColorStop(0.3, '#d8c880');
+    buckGrad.addColorStop(0.6, '#c8b060');
+    buckGrad.addColorStop(1, '#907830');
+    ctx.fillStyle = buckGrad;
+    ctx.beginPath(); ctx.arc(this.x, by + 6.5*S, 6*S, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#d0c080';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    // Buckle inner ring
+    ctx.strokeStyle = 'rgba(240,220,160,0.4)';
+    ctx.lineWidth = 0.6;
+    ctx.beginPath(); ctx.arc(this.x, by + 6.5*S, 3.5*S, 0, Math.PI*2); ctx.stroke();
+    // Buckle specular
+    ctx.fillStyle = 'rgba(255,250,220,0.5)';
+    ctx.beginPath(); ctx.arc(this.x - 1.5*S, by + 5*S, 1.5*S, 0, Math.PI*2); ctx.fill();
+
+    // === SHOULDER ARMOR — massive steel plates with realistic metallic shading ===
+    for (const side of [-1, 1]) {
+      // Layered plates (3 overlapping)
+      for (let plate = 2; plate >= 0; plate--) {
+        const pOff = plate * 3*S;
+        const spGrad = ctx.createLinearGradient(
+          this.x + 18*S*side, by - 24*S + pOff, this.x + 38*S*side, by - 6*S + pOff
+        );
+        spGrad.addColorStop(0, '#6a7a8a');
+        spGrad.addColorStop(0.2, '#8a9aaa');
+        spGrad.addColorStop(0.4, '#a8b8c8');
+        spGrad.addColorStop(0.55, '#c0d0e0');
+        spGrad.addColorStop(0.7, '#a0b0c0');
+        spGrad.addColorStop(1, '#5a6a7a');
+        ctx.fillStyle = spGrad;
+        ctx.beginPath();
+        ctx.moveTo(this.x + 20*S*side, by - 24*S + pOff);
+        ctx.quadraticCurveTo(this.x + 40*S*side, by - 20*S + pOff, this.x + 38*S*side, by - 8*S + pOff);
+        ctx.lineTo(this.x + 32*S*side, by - 3*S + pOff);
+        ctx.lineTo(this.x + 20*S*side, by - 6*S + pOff);
+        ctx.fill();
+        // Plate edge highlight
+        ctx.strokeStyle = 'rgba(200,215,230,0.35)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(this.x + 20*S*side, by - 24*S + pOff);
+        ctx.quadraticCurveTo(this.x + 40*S*side, by - 20*S + pOff, this.x + 38*S*side, by - 8*S + pOff);
+        ctx.stroke();
+      }
+      // Ornate boss/stud on shoulder — larger with engraving
+      const studGrad = ctx.createRadialGradient(this.x + 30*S*side, by - 14*S, 0.5*S, this.x + 30*S*side, by - 14*S, 5*S);
+      studGrad.addColorStop(0, '#f0e8d0');
+      studGrad.addColorStop(0.3, '#d0c8b0');
+      studGrad.addColorStop(0.6, '#a0988a');
+      studGrad.addColorStop(1, '#6a6258');
+      ctx.fillStyle = studGrad;
+      ctx.beginPath(); ctx.arc(this.x + 30*S*side, by - 14*S, 5*S, 0, Math.PI*2); ctx.fill();
+      // Stud ring
+      ctx.strokeStyle = 'rgba(200,190,170,0.5)';
+      ctx.lineWidth = 0.7;
+      ctx.beginPath(); ctx.arc(this.x + 30*S*side, by - 14*S, 3*S, 0, Math.PI*2); ctx.stroke();
+    }
+
+    // === ARMS — with muscle definition ===
+    const armSwing = this.moving ? Math.sin(this.walkCycle + Math.PI) * 4 : 0;
+    for (const side of [-1, 1]) {
+      if (side === 1 && this.attacking) continue;
+      ctx.save();
+      ctx.translate(this.x + 26*S*side, by - 14*S);
+      ctx.rotate(side * (side === -1 ? armSwing * 0.04 - 0.1 : -armSwing * 0.04 + 0.1));
+      // Arm with muscle bulge
+      const armGrad = ctx.createLinearGradient(-6*S, 0, 6*S, 0);
+      armGrad.addColorStop(0, '#1a1825');
+      armGrad.addColorStop(0.3, '#3a3548');
+      armGrad.addColorStop(0.5, '#454058');
+      armGrad.addColorStop(0.7, '#3a3548');
+      armGrad.addColorStop(1, '#1a1825');
+      ctx.fillStyle = armGrad;
+      ctx.beginPath();
+      ctx.moveTo(-6*S, 0);
+      ctx.quadraticCurveTo(-8*S, 8*S, -7*S, 14*S); // bicep bulge
+      ctx.quadraticCurveTo(-6*S, 22*S, -4*S, 27*S);
+      ctx.lineTo(4*S, 27*S);
+      ctx.quadraticCurveTo(6*S, 22*S, 7*S, 14*S);
+      ctx.quadraticCurveTo(8*S, 8*S, 6*S, 0);
+      ctx.fill();
+      // Arm wrinkle lines
+      ctx.strokeStyle = 'rgba(60,50,80,0.25)';
+      ctx.lineWidth = 0.6;
+      for (let w = 0; w < 3; w++) {
+        ctx.beginPath();
+        ctx.moveTo(-5*S, 6*S + w * 7*S);
+        ctx.quadraticCurveTo(0, 7*S + w * 7*S, 5*S, 6*S + w * 7*S);
+        ctx.stroke();
+      }
+      // Hand — more detailed with fingers
+      const handGrad = ctx.createRadialGradient(0, 27*S, 1*S, 0, 27*S, 5*S);
+      handGrad.addColorStop(0, '#d8b080');
+      handGrad.addColorStop(0.5, '#c49868');
+      handGrad.addColorStop(1, '#a07848');
+      ctx.fillStyle = handGrad;
+      ctx.beginPath(); ctx.arc(0, 27*S, 5*S, 0, Math.PI*2); ctx.fill();
+      // Finger lines
+      ctx.strokeStyle = 'rgba(140,100,60,0.3)';
+      ctx.lineWidth = 0.5;
+      for (let f = -2; f <= 2; f++) {
+        ctx.beginPath();
+        ctx.moveTo(f * 1.5*S, 25*S);
+        ctx.lineTo(f * 1.8*S, 31*S);
+        ctx.stroke();
+      }
+      // Knuckle highlights
+      ctx.fillStyle = 'rgba(220,180,130,0.3)';
+      ctx.beginPath(); ctx.arc(0, 26*S, 2*S, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+
+    // === NECK — thicker with tendons ===
+    const neckGrad = ctx.createLinearGradient(this.x - 6*S, by - 33*S, this.x + 6*S, by - 24*S);
+    neckGrad.addColorStop(0, '#9a7048');
+    neckGrad.addColorStop(0.3, '#b08858');
+    neckGrad.addColorStop(0.5, '#c8a070');
+    neckGrad.addColorStop(0.7, '#b08858');
+    neckGrad.addColorStop(1, '#9a7048');
+    ctx.fillStyle = neckGrad;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 8*S, by - 24*S);
+    ctx.quadraticCurveTo(this.x - 9*S, by - 28*S, this.x - 7*S, by - 33*S);
+    ctx.lineTo(this.x + 7*S, by - 33*S);
+    ctx.quadraticCurveTo(this.x + 9*S, by - 28*S, this.x + 8*S, by - 24*S);
+    ctx.fill();
+    // Neck tendon/muscle lines
+    ctx.strokeStyle = 'rgba(140,100,60,0.2)';
+    ctx.lineWidth = 0.8;
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(this.x + 3*S*side, by - 33*S);
+      ctx.quadraticCurveTo(this.x + 5*S*side, by - 28*S, this.x + 4*S*side, by - 24*S);
+      ctx.stroke();
+    }
+
+    // === HEAD — larger with realistic skin shading ===
+    // Base head shape — slightly elongated
+    const headGrad = ctx.createRadialGradient(this.x - 4*S, by - 50*S, 3*S, this.x, by - 45*S, 22*S);
+    headGrad.addColorStop(0, '#e0c090');
+    headGrad.addColorStop(0.3, '#d8b080');
+    headGrad.addColorStop(0.6, '#c8a068');
+    headGrad.addColorStop(1, '#a07848');
+    ctx.fillStyle = headGrad;
+    ctx.beginPath();
+    ctx.arc(this.x, by - 45*S, 22*S, 0, Math.PI*2);
+    ctx.fill();
+    // Jaw — wider, stronger, more angular
+    const jawGrad = ctx.createLinearGradient(this.x - 16*S, by - 38*S, this.x + 16*S, by - 26*S);
+    jawGrad.addColorStop(0, '#a88050');
+    jawGrad.addColorStop(0.3, '#c49868');
+    jawGrad.addColorStop(0.5, '#d0a878');
+    jawGrad.addColorStop(0.7, '#c49868');
+    jawGrad.addColorStop(1, '#a88050');
+    ctx.fillStyle = jawGrad;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 18*S, by - 38*S);
+    ctx.quadraticCurveTo(this.x - 16*S, by - 30*S, this.x - 9*S, by - 26*S);
+    ctx.quadraticCurveTo(this.x, by - 24*S, this.x + 9*S, by - 26*S);
+    ctx.quadraticCurveTo(this.x + 16*S, by - 30*S, this.x + 18*S, by - 38*S);
+    ctx.fill();
+    // Cheekbone highlight
+    for (const side of [-1, 1]) {
+      ctx.fillStyle = 'rgba(220,180,130,0.15)';
+      ctx.beginPath();
+      ctx.ellipse(this.x + 10*S*side, by - 44*S, 5*S, 3*S, 0.2*side, 0, Math.PI*2);
+      ctx.fill();
+    }
+    // Subsurface scattering — warm light through skin
+    RealGFX.skinSSS(ctx, this.x - 8*S, by - 42*S, 10*S);
+    RealGFX.skinSSS(ctx, this.x + 8*S, by - 42*S, 10*S);
+    // Subtle face shadow (under cheekbones)
+    for (const side of [-1, 1]) {
+      ctx.fillStyle = 'rgba(120,80,50,0.1)';
+      ctx.beginPath();
+      ctx.ellipse(this.x + 8*S*side, by - 38*S, 6*S, 3*S, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // === BEARD (dark, thick, Mongol-style with strand detail) ===
+    const beardGrad = ctx.createLinearGradient(this.x, by - 38*S, this.x, by - 24*S);
+    beardGrad.addColorStop(0, '#1a1008');
+    beardGrad.addColorStop(0.3, '#2a1a0a');
+    beardGrad.addColorStop(0.6, '#1a0e05');
+    beardGrad.addColorStop(1, '#0a0502');
+    ctx.fillStyle = beardGrad;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 12*S, by - 38*S);
+    ctx.quadraticCurveTo(this.x - 15*S, by - 32*S, this.x - 10*S, by - 24*S);
+    ctx.quadraticCurveTo(this.x, by - 21*S, this.x + 10*S, by - 24*S);
+    ctx.quadraticCurveTo(this.x + 15*S, by - 32*S, this.x + 12*S, by - 38*S);
+    ctx.fill();
+    // Detailed beard strands
+    ctx.strokeStyle = '#3a2a15';
+    ctx.lineWidth = 0.6;
+    for (let bi = -10; bi <= 10; bi += 1.5) {
+      const bLen = 12 + Math.sin(bi * 0.8) * 3;
+      ctx.beginPath();
+      ctx.moveTo(this.x + bi*S, by - 37*S);
+      ctx.quadraticCurveTo(this.x + bi*S + Math.sin(bi)*1*S, by - 30*S, this.x + bi*S + Math.sin(bi*0.5)*2*S, by - (37 - bLen)*S);
+      ctx.stroke();
+    }
+    // Beard highlight (oily sheen)
+    ctx.fillStyle = 'rgba(60,45,25,0.15)';
+    ctx.beginPath();
+    ctx.ellipse(this.x, by - 32*S, 8*S, 5*S, 0, 0, Math.PI*2);
+    ctx.fill();
+    // Mustache — thicker, more detailed
+    for (const side of [-1, 1]) {
+      const mustGrad = ctx.createLinearGradient(this.x, by - 38*S, this.x + 13*S*side, by - 35*S);
+      mustGrad.addColorStop(0, '#1a0e05');
+      mustGrad.addColorStop(0.5, '#2a1a0a');
+      mustGrad.addColorStop(1, '#1a0e05');
+      ctx.fillStyle = mustGrad;
+      ctx.beginPath();
+      ctx.moveTo(this.x + 1*S*side, by - 39*S);
+      ctx.quadraticCurveTo(this.x + 8*S*side, by - 38.5*S, this.x + 14*S*side, by - 35*S);
+      ctx.quadraticCurveTo(this.x + 8*S*side, by - 35*S, this.x + 1*S*side, by - 36*S);
+      ctx.fill();
+    }
+
+    // === EYES (larger, more detailed with realistic shading) ===
+    for (const side of [-1, 1]) {
+      const ex = this.x + 7*S*side;
+      const ey = by - 47*S;
+      // Eye socket shadow
+      ctx.fillStyle = 'rgba(100,70,40,0.2)';
+      ctx.beginPath(); ctx.ellipse(ex, ey, 6*S, 4*S, 0.1*side, 0, Math.PI*2); ctx.fill();
+      // Eye white
+      const eyeWGrad = ctx.createRadialGradient(ex, ey, 1*S, ex, ey, 4.5*S);
+      eyeWGrad.addColorStop(0, '#f8f0e0');
+      eyeWGrad.addColorStop(0.7, '#e8dcc8');
+      eyeWGrad.addColorStop(1, '#d0c0a8');
+      ctx.fillStyle = eyeWGrad;
+      ctx.beginPath(); ctx.ellipse(ex, ey, 4.5*S, 2.5*S, -0.1*side, 0, Math.PI*2); ctx.fill();
+      // Iris
+      const irisGrad = ctx.createRadialGradient(ex, ey, 0.3*S, ex, ey, 2.2*S);
+      irisGrad.addColorStop(0, '#3a2a10');
+      irisGrad.addColorStop(0.5, '#2a1a08');
+      irisGrad.addColorStop(1, '#1a0e05');
+      ctx.fillStyle = irisGrad;
+      ctx.beginPath(); ctx.arc(ex, ey, 2.2*S, 0, Math.PI*2); ctx.fill();
+      // Pupil
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(ex, ey, 1.2*S, 0, Math.PI*2); ctx.fill();
+      // Specular highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.beginPath(); ctx.arc(ex - 0.8*S*side, ey - 0.8*S, 0.9*S, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.beginPath(); ctx.arc(ex + 0.5*S*side, ey + 0.5*S, 0.5*S, 0, Math.PI*2); ctx.fill();
+      // Upper eyelid crease
+      ctx.strokeStyle = 'rgba(100,70,40,0.4)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.ellipse(ex, ey - 1*S, 5*S, 2.5*S, 0.05*side, Math.PI + 0.3, -0.3);
+      ctx.stroke();
+      // Lower eyelid
+      ctx.strokeStyle = 'rgba(140,100,60,0.25)';
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.ellipse(ex, ey + 0.5*S, 4*S, 1.5*S, 0, 0.3, Math.PI - 0.3);
+      ctx.stroke();
+    }
+    // Heavy brows — thicker, more realistic
+    ctx.lineWidth = 3.5*S;
+    ctx.lineCap = 'round';
+    for (const side of [-1, 1]) {
+      const browGrad = ctx.createLinearGradient(this.x + 13*S*side, by - 52*S, this.x + 3*S*side, by - 50*S);
+      browGrad.addColorStop(0, '#1a0e05');
+      browGrad.addColorStop(1, '#2a1a0a');
+      ctx.strokeStyle = browGrad;
+      ctx.beginPath();
+      ctx.moveTo(this.x + 13*S*side, by - 52*S);
+      ctx.quadraticCurveTo(this.x + 7*S*side, by - 54*S, this.x + 3*S*side, by - 50*S);
+      ctx.stroke();
+    }
+    ctx.lineCap = 'butt';
+    // Nose — broader, with bridge shadow and nostrils
+    ctx.strokeStyle = 'rgba(140,100,55,0.4)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(this.x, by - 48*S);
+    ctx.quadraticCurveTo(this.x - 1*S, by - 42*S, this.x - 3*S, by - 38*S);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(this.x, by - 48*S);
+    ctx.quadraticCurveTo(this.x + 1*S, by - 42*S, this.x + 3*S, by - 38*S);
+    ctx.stroke();
+    // Nostrils
+    ctx.fillStyle = 'rgba(100,65,35,0.35)';
+    ctx.beginPath(); ctx.arc(this.x - 2.5*S, by - 38*S, 1.2*S, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(this.x + 2.5*S, by - 38*S, 1.2*S, 0, Math.PI*2); ctx.fill();
+    // Nose tip highlight
+    ctx.fillStyle = 'rgba(220,180,130,0.2)';
+    ctx.beginPath(); ctx.arc(this.x, by - 40*S, 2.5*S, 0, Math.PI*2); ctx.fill();
+
+    // === HELMET — ornate Mongol steel/silver with red gem & horsehair plume ===
+    // Helmet dome — larger, more detailed metallic shading
+    const helmGrad = ctx.createLinearGradient(this.x - 26*S, by - 75*S, this.x + 26*S, by - 45*S);
+    helmGrad.addColorStop(0, '#4a5868');
+    helmGrad.addColorStop(0.15, '#6a7a8a');
+    helmGrad.addColorStop(0.3, '#8a9aaa');
+    helmGrad.addColorStop(0.45, '#a8b8c8');
+    helmGrad.addColorStop(0.55, '#c0d0e0');
+    helmGrad.addColorStop(0.65, '#a8b8c8');
+    helmGrad.addColorStop(0.8, '#7a8a9a');
+    helmGrad.addColorStop(1, '#4a5868');
+    ctx.fillStyle = helmGrad;
+    ctx.beginPath();
+    ctx.arc(this.x, by - 54*S, 26*S, Math.PI, 0);
+    ctx.fill();
+    // Helmet metallic specular
+    RealGFX.metalSpecular(ctx, this.x - 5*S, by - 60*S, 20*S, 15*S, 0.18);
+    // Helmet plate segmentation
+    ctx.strokeStyle = 'rgba(180,200,220,0.2)';
+    ctx.lineWidth = 0.8;
+    for (let seg = 0; seg < 8; seg++) {
+      const a = Math.PI + (seg / 8) * Math.PI;
+      ctx.beginPath();
+      ctx.moveTo(this.x + Math.cos(a) * 26*S, by - 54*S + Math.sin(a) * 26*S);
+      ctx.lineTo(this.x, by - 80*S);
+      ctx.stroke();
+    }
+    // Helmet ornate ridge (center line) — raised with shadow
+    ctx.strokeStyle = '#d0dce8';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(this.x, by - 80*S); ctx.lineTo(this.x, by - 50*S);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(this.x + 0.8, by - 80*S); ctx.lineTo(this.x + 0.8, by - 50*S);
+    ctx.stroke();
+    // Ridge shadow
+    ctx.strokeStyle = 'rgba(60,70,80,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 1.5, by - 79*S); ctx.lineTo(this.x - 1.5, by - 50*S);
+    ctx.stroke();
+
+    // Helmet brim with ornate silver band
+    const brimGrad = ctx.createLinearGradient(0, by - 50*S, 0, by - 43*S);
+    brimGrad.addColorStop(0, '#c8d8e8');
+    brimGrad.addColorStop(0.2, '#b0c0d0');
+    brimGrad.addColorStop(0.5, '#98a8b8');
+    brimGrad.addColorStop(0.8, '#8090a0');
+    brimGrad.addColorStop(1, '#607080');
+    ctx.fillStyle = brimGrad;
+    ctx.fillRect(this.x - 28*S, by - 50*S, 56*S, 7*S);
+    // Ornate scroll pattern on brim
+    ctx.strokeStyle = 'rgba(200,215,230,0.4)';
+    ctx.lineWidth = 0.7;
+    for (let px = -24*S; px <= 24*S; px += 5*S) {
+      ctx.beginPath();
+      ctx.arc(this.x + px, by - 46.5*S, 2*S, 0, Math.PI);
+      ctx.stroke();
+    }
+
+    // === RED GEM on helmet front — larger with facets ===
+    const gemGrad = ctx.createRadialGradient(this.x - 1*S, by - 53*S, 0.5*S, this.x, by - 53*S, 5.5*S);
+    gemGrad.addColorStop(0, '#ff6666');
+    gemGrad.addColorStop(0.2, '#ff3333');
+    gemGrad.addColorStop(0.5, '#cc1111');
+    gemGrad.addColorStop(0.8, '#880000');
+    gemGrad.addColorStop(1, '#440000');
+    ctx.fillStyle = gemGrad;
+    ctx.beginPath(); ctx.arc(this.x, by - 53*S, 5*S, 0, Math.PI*2); ctx.fill();
+    // Gem setting (silver ring)
+    ctx.strokeStyle = '#c0d0e0';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Gem facet lines
+    ctx.strokeStyle = 'rgba(255,150,150,0.2)';
+    ctx.lineWidth = 0.5;
+    for (let f = 0; f < 6; f++) {
+      const fa = f * Math.PI / 3;
+      ctx.beginPath();
+      ctx.moveTo(this.x, by - 53*S);
+      ctx.lineTo(this.x + Math.cos(fa) * 4.5*S, by - 53*S + Math.sin(fa) * 4.5*S);
+      ctx.stroke();
+    }
+    // Gem highlight
+    ctx.fillStyle = 'rgba(255,200,200,0.8)';
+    ctx.beginPath(); ctx.arc(this.x - 1.5*S, by - 54.5*S, 1.8*S, 0, Math.PI*2); ctx.fill();
+    // Gem glow
+    ctx.globalAlpha = 0.2;
+    const gemGlow = ctx.createRadialGradient(this.x, by - 53*S, 3*S, this.x, by - 53*S, 18*S);
+    gemGlow.addColorStop(0, '#ff2222');
+    gemGlow.addColorStop(1, 'rgba(255,0,0,0)');
+    ctx.fillStyle = gemGlow;
+    ctx.beginPath(); ctx.arc(this.x, by - 53*S, 18*S, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = flash ? 0.4 : 1;
+
+    // === HORSEHAIR PLUME (flowing from helmet top) — thicker, more strands ===
+    const plumeSway = Math.sin(globalTime * 2.5) * 8 + (this.moving ? Math.sin(globalTime * 5) * 5 : 0);
+    // Multiple plume layers for volume
+    for (let pl = 0; pl < 3; pl++) {
+      const pOff = (pl - 1) * 2;
+      const plumeGrad = ctx.createLinearGradient(this.x + pOff, by - 80*S, this.x + plumeSway + pOff, by - 115*S);
+      plumeGrad.addColorStop(0, pl === 1 ? '#2a1a0a' : '#1a0e05');
+      plumeGrad.addColorStop(0.4, '#2a1a0a');
+      plumeGrad.addColorStop(0.8, '#1a0e05');
+      plumeGrad.addColorStop(1, '#0a0502');
+      ctx.fillStyle = plumeGrad;
+      ctx.beginPath();
+      ctx.moveTo(this.x - 4 + pOff, by - 80*S);
+      ctx.bezierCurveTo(this.x - 3 + pOff, by - 92*S, this.x + plumeSway * 0.5 + pOff, by - 105*S, this.x + plumeSway + pOff, by - 117*S);
+      ctx.lineTo(this.x + plumeSway + 3 + pOff, by - 114*S);
+      ctx.bezierCurveTo(this.x + plumeSway * 0.5 + 4 + pOff, by - 102*S, this.x + 5 + pOff, by - 90*S, this.x + 4 + pOff, by - 80*S);
+      ctx.fill();
+    }
+    // Detailed plume hair strands
+    ctx.lineWidth = 0.6;
+    for (let pi = 0; pi < 10; pi++) {
+      const t = pi / 10;
+      const psx = this.x + plumeSway * t + (Math.random() - 0.5) * 2;
+      const psy = by - 80*S - t * 37*S;
+      ctx.strokeStyle = `rgba(58,42,21,${0.3 + Math.sin(pi)*0.15})`;
+      ctx.beginPath();
+      ctx.moveTo(psx, psy);
+      ctx.quadraticCurveTo(psx + (2 + Math.sin(pi + globalTime)*2), psy - 3*S, psx + Math.sin(pi*0.7)*3, psy - 6*S);
+      ctx.stroke();
+    }
+
+    // === Cheek guards (hanging from helmet sides) — larger, more detailed ===
+    for (const side of [-1, 1]) {
+      const cgGrad = ctx.createLinearGradient(this.x + 24*S*side, by - 48*S, this.x + 20*S*side, by - 32*S);
+      cgGrad.addColorStop(0, '#8a9aaa');
+      cgGrad.addColorStop(0.3, '#a0b0c0');
+      cgGrad.addColorStop(0.6, '#b0c0d0');
+      cgGrad.addColorStop(1, '#607080');
+      ctx.fillStyle = cgGrad;
+      ctx.beginPath();
+      ctx.moveTo(this.x + 24*S*side, by - 48*S);
+      ctx.lineTo(this.x + 27*S*side, by - 42*S);
+      ctx.lineTo(this.x + 25*S*side, by - 32*S);
+      ctx.lineTo(this.x + 18*S*side, by - 35*S);
+      ctx.lineTo(this.x + 19*S*side, by - 45*S);
+      ctx.fill();
+      // Cheek guard edge highlight
+      ctx.strokeStyle = 'rgba(200,215,230,0.3)';
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(this.x + 24*S*side, by - 48*S);
+      ctx.lineTo(this.x + 27*S*side, by - 42*S);
+      ctx.lineTo(this.x + 25*S*side, by - 32*S);
+      ctx.stroke();
+    }
+
+    // === SWORD (Mongol saber/dao) — larger, more detailed ===
+    const swordAngle = this.attacking
+      ? this.attackAngle + Math.sin(this.swingFrame * 28) * 1.8
+      : (this.facingRight ? -0.4 : Math.PI + 0.4);
+
+    const sx = this.x + Math.cos(swordAngle) * 26*S;
+    const sy = by - 7*S + Math.sin(swordAngle) * 26*S;
+    const sLen = 85*S;
+    const ex = sx + Math.cos(swordAngle) * sLen;
+    const ey = sy + Math.sin(swordAngle) * sLen;
+    const perpX = Math.cos(swordAngle + Math.PI/2);
+    const perpY = Math.sin(swordAngle + Math.PI/2);
+
+    if (this.attacking) {
+      ctx.strokeStyle = 'rgba(180,200,230,0.3)';
+      ctx.lineWidth = 22*S;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+    }
+
+    // Blade with steel gradient
+    const bladeGrad = ctx.createLinearGradient(
+      sx + perpX * 4*S, sy + perpY * 4*S,
+      sx - perpX * 4*S, sy - perpY * 4*S
+    );
+    bladeGrad.addColorStop(0, '#666');
+    bladeGrad.addColorStop(0.2, '#999');
+    bladeGrad.addColorStop(0.35, '#ccc');
+    bladeGrad.addColorStop(0.5, this.attacking ? '#eef0ff' : '#e8e8e8');
+    bladeGrad.addColorStop(0.65, '#bbb');
+    bladeGrad.addColorStop(0.8, '#999');
+    bladeGrad.addColorStop(1, '#777');
+    ctx.strokeStyle = bladeGrad;
+    ctx.lineWidth = 7*S;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+
+    // Blade edge (hamon-like wavy line)
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    for (let t = 0; t <= 1; t += 0.05) {
+      const bpx = sx + (ex-sx)*t + perpX*(2*S + Math.sin(t*30)*0.8*S);
+      const bpy = sy + (ey-sy)*t + perpY*(2*S + Math.sin(t*30)*0.8*S);
+      t === 0 ? ctx.moveTo(bpx, bpy) : ctx.lineTo(bpx, bpy);
+    }
+    ctx.stroke();
+
+    // Guard — ornate with dragon motif
+    const gx = sx + Math.cos(swordAngle) * 4*S;
+    const gy = sy + Math.sin(swordAngle) * 4*S;
+    const guardGrad = ctx.createRadialGradient(gx, gy, 1*S, gx, gy, 14*S);
+    guardGrad.addColorStop(0, '#d0dce8');
+    guardGrad.addColorStop(0.3, '#b0c0d0');
+    guardGrad.addColorStop(0.6, '#8090a0');
+    guardGrad.addColorStop(1, '#506070');
+    ctx.fillStyle = guardGrad;
+    ctx.beginPath();
+    ctx.ellipse(gx, gy, 14*S, 5.5*S, swordAngle, 0, Math.PI*2);
+    ctx.fill();
+    // Guard edge
+    ctx.strokeStyle = 'rgba(200,215,230,0.4)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // Handle — wrapped leather
+    ctx.strokeStyle = '#3a2510';
+    ctx.lineWidth = 6*S;
+    ctx.beginPath();
+    ctx.moveTo(this.x, by - 4*S); ctx.lineTo(sx, sy);
+    ctx.stroke();
+    ctx.strokeStyle = '#5a3a20';
+    ctx.lineWidth = 1;
+    const hAngle = Math.atan2(sy - (by - 4*S), sx - this.x);
+    const hLen = Math.hypot(sx - this.x, sy - (by - 4*S));
+    for (let i = 3; i < hLen; i += 4*S) {
+      const wx = this.x + Math.cos(hAngle) * i;
+      const wy = (by - 4*S) + Math.sin(hAngle) * i;
+      ctx.beginPath();
+      ctx.moveTo(wx + perpX*3*S, wy + perpY*3*S);
+      ctx.lineTo(wx - perpX*3*S, wy - perpY*3*S);
+      ctx.stroke();
+    }
+
+    // Attack arc
+    if (this.attacking) {
+      for (let i = 0; i < 4; i++) {
+        ctx.strokeStyle = `rgba(180,200,230,${0.18 - i * 0.04})`;
+        ctx.lineWidth = 4 - i;
+        ctx.beginPath();
+        ctx.arc(this.x, by, this.attackRange - i * 10, this.attackAngle - 0.9, this.attackAngle + 0.9);
+        ctx.stroke();
+      }
+    }
+
+    // Heal glow
+    if (this.healing) {
+      const ha = this.healTimer / 0.5;
+      const radius = 42*S + (1 - ha) * 35;
+      ctx.globalAlpha = ha * 0.2;
+      const healGlow = ctx.createRadialGradient(this.x, by, radius * 0.5, this.x, by, radius * 1.5);
+      healGlow.addColorStop(0, 'rgba(68,255,136,0.3)');
+      healGlow.addColorStop(1, 'rgba(68,255,136,0)');
+      ctx.fillStyle = healGlow;
+      ctx.beginPath(); ctx.arc(this.x, by, radius * 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = ha * 0.6;
+      ctx.strokeStyle = '#44ff88';
+      ctx.shadowColor = '#44ff88';
+      ctx.shadowBlur = 25;
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(this.x, by, radius, 0, Math.PI * 2); ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
+    // === RIM LIGHT (subtle edge glow from ambient) ===
+    ctx.globalAlpha = 0.08;
+    ctx.strokeStyle = '#c8d8f0';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(this.x, by - 45*S, 23*S, -0.8, 0.8);
+    ctx.stroke();
+
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = 1;
+    ctx.lineCap = 'butt';
+  }
+}
+
+// ==================== SAMURAI ENEMY ====================
+class Samurai {
+  constructor(x, y, wave) {
+    this.x = x; this.y = y;
+    this.w = 30; this.h = 46;
+    this.hp = 28 + wave * 2.5;
+    this.maxHp = this.hp;
+    this.speed = 70 + wave * 2.5;
+    this.damage = 8 + Math.floor(wave * 0.6);
+    this.attackRange = 45;
+    this.attackCooldown = 0;
+    this.hitFlash = 0;
+    this.knockbackX = 0; this.knockbackY = 0;
+    this.knockbackTimer = 0;
+    this.type = wave >= 15 ? 'elite' : (wave >= 8 ? 'veteran' : 'normal');
+    if (this.type === 'elite') {
+      this.hp *= 1.6; this.maxHp = this.hp;
+      this.speed *= 1.1; this.damage += 4;
+    } else if (this.type === 'veteran') {
+      this.hp *= 1.3; this.maxHp = this.hp;
+      this.damage += 2;
+    }
+    this.walkCycle = Math.random() * Math.PI * 2;
+  }
+
+  update(dt, game) {
+    if (this.knockbackTimer > 0) {
+      this.knockbackTimer -= dt;
+      this.x += this.knockbackX * dt;
+      this.y += this.knockbackY * dt;
+      return;
+    }
+    if (this.hitFlash > 0) this.hitFlash -= dt;
+    this.walkCycle += dt * 8;
+
+    const p = game.player;
+    const dx = p.x - this.x;
+    const dy = p.y - this.y;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist > this.attackRange) {
+      this.x += (dx/dist) * this.speed * dt;
+      this.y += (dy/dist) * this.speed * dt;
+    } else if (this.attackCooldown <= 0) {
+      p.takeDamage(this.damage, game);
+      this.attackCooldown = 1.1;
+      this.knockbackX = -(dx/dist) * 100;
+      this.knockbackY = -(dy/dist) * 100;
+      this.knockbackTimer = 0.1;
+    }
+
+    if (this.attackCooldown > 0) this.attackCooldown -= dt;
+    this.x = Math.max(15, Math.min(canvas.width - 15, this.x));
+    this.y = Math.max(23, Math.min(canvas.height - 23, this.y));
+  }
+
+  draw(ctx) {
+    const flash = this.hitFlash > 0;
+    const isElite = this.type === 'elite';
+    const isVet = this.type === 'veteran';
+    const bob = Math.sin(this.walkCycle) * 1.5;
+    const by = this.y + bob;
+
+    // Soft shadow
+    const shG = ctx.createRadialGradient(this.x, this.y + 24, 2, this.x, this.y + 24, 20);
+    shG.addColorStop(0, 'rgba(0,0,0,0.4)');
+    shG.addColorStop(0.5, 'rgba(0,0,0,0.15)');
+    shG.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = shG;
+    ctx.beginPath();
+    ctx.ellipse(this.x, this.y + 24, 20, 7, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // Elite/vet aura
+    if (isElite || isVet) {
+      ctx.globalAlpha = 0.08 + Math.sin(globalTime * 5) * 0.03;
+      ctx.fillStyle = isElite ? '#cc2222' : '#8833ff';
+      ctx.beginPath(); ctx.arc(this.x, by, 35, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // --- BRONZE/COPPER color palette (like reference) ---
+    // Normal: bronze/copper. Veteran: darker iron. Elite: black+gold.
+
+    // Bronze/copper color base (like Sekiro reference)
+    const arB = isElite ? [50,30,10] : isVet ? [70,50,25] : [140,90,35]; // armor bronze
+    const laceR = isElite ? [180,40,40] : isVet ? [120,30,30] : [180,50,50]; // red lacing
+
+    // Legs (dark hakama)
+    const legS = Math.sin(this.walkCycle) * 3;
+    for (const side of [-1, 1]) {
+      const legGr = ctx.createLinearGradient(0, by + 10, 0, by + 24);
+      legGr.addColorStop(0, flash ? '#eee' : '#1a1520');
+      legGr.addColorStop(1, flash ? '#ddd' : '#0a0810');
+      ctx.fillStyle = legGr;
+      ctx.save(); ctx.translate(this.x + 5*side, by + 10);
+      ctx.rotate(side * legS * 0.06);
+      ctx.beginPath();
+      ctx.moveTo(-4, 0); ctx.lineTo(4, 0); ctx.lineTo(3, 14); ctx.lineTo(-3, 14);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Waraji sandals
+    ctx.fillStyle = flash ? '#ddd' : '#3a2a18';
+    ctx.fillRect(this.x - 9, by + 22, 8, 4);
+    ctx.fillRect(this.x + 1, by + 22, 8, 4);
+
+    // Body (dark kimono under armor)
+    ctx.fillStyle = flash ? '#fff' : '#1a1520';
+    ctx.beginPath();
+    ctx.moveTo(this.x - 11, by - 14); ctx.lineTo(this.x + 11, by - 14);
+    ctx.lineTo(this.x + 10, by + 12); ctx.lineTo(this.x - 10, by + 12);
+    ctx.fill();
+
+    // Red obi sash
+    const obiGr = ctx.createLinearGradient(this.x - 11, by, this.x + 11, by + 4);
+    obiGr.addColorStop(0, `rgb(${laceR[0]-40},${laceR[1]-15},${laceR[2]-15})`);
+    obiGr.addColorStop(0.5, `rgb(${laceR[0]},${laceR[1]},${laceR[2]})`);
+    obiGr.addColorStop(1, `rgb(${laceR[0]-30},${laceR[1]-10},${laceR[2]-10})`);
+    ctx.fillStyle = flash ? '#eee' : obiGr;
+    ctx.fillRect(this.x - 11, by, 22, 4);
+
+    // Do (chest armor) — bronze/copper plates
+    const arGr = ctx.createLinearGradient(this.x - 11, by - 14, this.x + 11, by - 2);
+    arGr.addColorStop(0, `rgb(${arB[0]+40},${arB[1]+30},${arB[2]+15})`);
+    arGr.addColorStop(0.3, `rgb(${arB[0]+70},${arB[1]+50},${arB[2]+25})`);
+    arGr.addColorStop(0.5, `rgb(${arB[0]+90},${arB[1]+65},${arB[2]+30})`);
+    arGr.addColorStop(0.7, `rgb(${arB[0]+50},${arB[1]+35},${arB[2]+18})`);
+    arGr.addColorStop(1, `rgb(${arB[0]+20},${arB[1]+15},${arB[2]+8})`);
+    ctx.fillStyle = flash ? '#ffe0b0' : arGr;
+    ctx.fillRect(this.x - 11, by - 14, 22, 12);
+    // Red lacing rows
+    for (let i = 0; i < 3; i++) {
+      const ry = by - 12 + i * 4;
+      ctx.strokeStyle = `rgba(${laceR[0]},${laceR[1]},${laceR[2]},0.6)`;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(this.x - 10, ry); ctx.lineTo(this.x + 10, ry); ctx.stroke();
+      // Red lacing knots
+      if (!flash) {
+        ctx.fillStyle = `rgb(${laceR[0]},${laceR[1]},${laceR[2]})`;
+        for (let lx = -7; lx <= 7; lx += 7) {
+          ctx.beginPath(); ctx.arc(this.x + lx, ry + 1.5, 1, 0, Math.PI*2); ctx.fill();
+        }
+      }
+    }
+
+    // Sode (shoulder guards) — large bronze plates with red lacing
+    for (const side of [-1, 1]) {
+      const sGr = ctx.createLinearGradient(this.x + 10*side, by - 14, this.x + 20*side, by);
+      sGr.addColorStop(0, `rgb(${arB[0]+60},${arB[1]+45},${arB[2]+20})`);
+      sGr.addColorStop(0.5, `rgb(${arB[0]+80},${arB[1]+55},${arB[2]+25})`);
+      sGr.addColorStop(1, `rgb(${arB[0]+30},${arB[1]+20},${arB[2]+10})`);
+      ctx.fillStyle = flash ? '#ffe0b0' : sGr;
+      ctx.beginPath();
+      ctx.moveTo(this.x + 10*side, by - 14);
+      ctx.lineTo(this.x + 20*side, by - 12);
+      ctx.lineTo(this.x + 20*side, by);
+      ctx.lineTo(this.x + 10*side, by - 2);
+      ctx.fill();
+      // Red lacing on sode
+      ctx.strokeStyle = `rgba(${laceR[0]},${laceR[1]},${laceR[2]},0.4)`;
+      ctx.lineWidth = 0.6;
+      ctx.beginPath(); ctx.moveTo(this.x + 11*side, by - 10); ctx.lineTo(this.x + 19*side, by - 8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(this.x + 11*side, by - 6); ctx.lineTo(this.x + 19*side, by - 4); ctx.stroke();
+    }
+
+    // Neck
+    ctx.fillStyle = flash ? '#fff' : '#deb887';
+    ctx.fillRect(this.x - 3, by - 19, 6, 5);
+
+    // Head
+    const headG = ctx.createRadialGradient(this.x - 2, by - 27, 2, this.x, by - 24, 12);
+    headG.addColorStop(0, flash ? '#fff' : '#e0c090');
+    headG.addColorStop(0.6, flash ? '#f8f8f8' : '#d0b078');
+    headG.addColorStop(1, flash ? '#eee' : '#b89058');
+    ctx.fillStyle = headG;
+    ctx.beginPath(); ctx.arc(this.x, by - 24, 11, 0, Math.PI*2); ctx.fill();
+    // Stern face — frown lines, narrowed eyes
+    ctx.fillStyle = '#f0e0c8';
+    ctx.beginPath(); ctx.ellipse(this.x - 4, by - 25, 2.5, 1.5, -0.1, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(this.x + 4, by - 25, 2.5, 1.5, 0.1, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#2a1a08';
+    ctx.beginPath(); ctx.arc(this.x - 4, by - 25, 1.3, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(this.x + 4, by - 25, 1.3, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(this.x - 4, by - 25, 0.7, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(this.x + 4, by - 25, 0.7, 0, Math.PI*2); ctx.fill();
+    // Stern eyebrows (angled down)
+    ctx.strokeStyle = '#2a1a08';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(this.x - 7, by - 28.5); ctx.lineTo(this.x - 2, by - 27); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(this.x + 7, by - 28.5); ctx.lineTo(this.x + 2, by - 27); ctx.stroke();
+    // Mouth — tight frown
+    ctx.strokeStyle = '#8a5a30';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(this.x - 3, by - 21); ctx.lineTo(this.x + 3, by - 21); ctx.stroke();
+
+    // === KABUTO (bronze helmet with bull horns) ===
+    const helmGr = ctx.createLinearGradient(this.x - 14, by - 40, this.x + 14, by - 24);
+    helmGr.addColorStop(0, `rgb(${arB[0]+30},${arB[1]+20},${arB[2]+10})`);
+    helmGr.addColorStop(0.3, `rgb(${arB[0]+60},${arB[1]+45},${arB[2]+20})`);
+    helmGr.addColorStop(0.5, `rgb(${arB[0]+90},${arB[1]+65},${arB[2]+30})`);
+    helmGr.addColorStop(0.7, `rgb(${arB[0]+50},${arB[1]+35},${arB[2]+15})`);
+    helmGr.addColorStop(1, `rgb(${arB[0]+20},${arB[1]+15},${arB[2]+5})`);
+    ctx.fillStyle = flash ? '#ffeedd' : helmGr;
+    ctx.beginPath(); ctx.arc(this.x, by - 28, 14, Math.PI, 0); ctx.fill();
+
+    // Helmet grid pattern (riveted plates)
+    ctx.strokeStyle = `rgba(${arB[0]+100},${arB[1]+75},${arB[2]+35},0.3)`;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(this.x, by - 42); ctx.lineTo(this.x, by - 26); ctx.stroke();
+    for (let hr = 0; hr < 3; hr++) {
+      const hry = by - 38 + hr * 4;
+      ctx.beginPath(); ctx.arc(this.x, hry, 8 + hr*2, Math.PI, 0); ctx.stroke();
+    }
+
+    // Helmet brim
+    const brimGr = ctx.createLinearGradient(0, by - 25, 0, by - 22);
+    brimGr.addColorStop(0, `rgb(${arB[0]+70},${arB[1]+50},${arB[2]+25})`);
+    brimGr.addColorStop(1, `rgb(${arB[0]+30},${arB[1]+20},${arB[2]+10})`);
+    ctx.fillStyle = flash ? '#eee' : brimGr;
+    ctx.fillRect(this.x - 15, by - 24, 30, 3);
+
+    // === BULL HORNS (large, sweeping, golden/bronze) ===
+    for (const side of [-1, 1]) {
+      const hornGr = ctx.createLinearGradient(this.x + 14*side, by - 28, this.x + 30*side, by - 44);
+      hornGr.addColorStop(0, `rgb(${arB[0]+60},${arB[1]+45},${arB[2]+20})`);
+      hornGr.addColorStop(0.5, `rgb(${arB[0]+100},${arB[1]+75},${arB[2]+35})`);
+      hornGr.addColorStop(1, `rgb(${arB[0]+40},${arB[1]+30},${arB[2]+12})`);
+      ctx.fillStyle = flash ? '#ffe8c0' : hornGr;
+      ctx.beginPath();
+      ctx.moveTo(this.x + 12*side, by - 28);
+      ctx.quadraticCurveTo(this.x + 22*side, by - 34, this.x + 32*side, by - 46);
+      ctx.lineTo(this.x + 30*side, by - 44);
+      ctx.quadraticCurveTo(this.x + 20*side, by - 33, this.x + 10*side, by - 26);
+      ctx.fill();
+      // Horn tip highlight
+      ctx.fillStyle = 'rgba(255,240,200,0.4)';
+      ctx.beginPath(); ctx.arc(this.x + 31*side, by - 45, 1.5, 0, Math.PI*2); ctx.fill();
+    }
+
+    // Maedate (front crest — golden disk like reference)
+    const diskGr = ctx.createRadialGradient(this.x, by - 33, 1, this.x, by - 33, 5);
+    diskGr.addColorStop(0, '#ffe8a0');
+    diskGr.addColorStop(0.5, '#d4b050');
+    diskGr.addColorStop(1, '#a08030');
+    ctx.fillStyle = flash ? '#fff' : diskGr;
+    ctx.beginPath(); ctx.arc(this.x, by - 33, 4, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#c8a44e';
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+
+    // Shikoro (neck guard) — bronze layered
+    ctx.fillStyle = flash ? '#ffeedd' : `rgb(${arB[0]+40},${arB[1]+30},${arB[2]+12})`;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 14, by - 22);
+    ctx.lineTo(this.x - 17, by - 16);
+    ctx.lineTo(this.x + 17, by - 16);
+    ctx.lineTo(this.x + 14, by - 22);
+    ctx.fill();
+    // Red lacing on shikoro
+    ctx.strokeStyle = `rgba(${laceR[0]},${laceR[1]},${laceR[2]},0.4)`;
+    ctx.lineWidth = 0.6;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(this.x - 15 + i, by - 21 + i * 2);
+      ctx.lineTo(this.x + 15 - i, by - 21 + i * 2);
+      ctx.stroke();
+    }
+
+    // Katana
+    const kAngle = Math.atan2(
+      (game ? game.player.y : this.y) - this.y,
+      (game ? game.player.x : this.x) - this.x
+    );
+    const kPerpX = Math.cos(kAngle + Math.PI/2);
+    const kPerpY = Math.sin(kAngle + Math.PI/2);
+    const bsx = this.x + Math.cos(kAngle)*12;
+    const bsy = by - 3 + Math.sin(kAngle)*12;
+    const bex = this.x + Math.cos(kAngle)*44;
+    const bey = by - 3 + Math.sin(kAngle)*44;
+    const blGr = ctx.createLinearGradient(bsx + kPerpX*2, bsy + kPerpY*2, bsx - kPerpX*2, bsy - kPerpY*2);
+    blGr.addColorStop(0, '#777'); blGr.addColorStop(0.3, '#ddd');
+    blGr.addColorStop(0.5, flash ? '#fff' : '#eee');
+    blGr.addColorStop(0.7, '#c0c0c0'); blGr.addColorStop(1, '#888');
+    ctx.strokeStyle = blGr;
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(bsx, bsy); ctx.lineTo(bex, bey); ctx.stroke();
+    // Tsuba
+    const tx = this.x + Math.cos(kAngle)*11;
+    const ty = by - 3 + Math.sin(kAngle)*11;
+    ctx.fillStyle = flash ? '#eee' : '#8a7744';
+    ctx.beginPath(); ctx.ellipse(tx, ty, 5, 3, kAngle, 0, Math.PI*2); ctx.fill();
+    ctx.lineCap = 'butt'; ctx.lineWidth = 1;
+
+    // HP bar
+    if (this.hp < this.maxHp) {
+      const bw = 34, bh = 5;
+      const bx = this.x - bw/2, byHP = by - 46;
+      ctx.fillStyle = 'rgba(10,0,0,0.7)';
+      ctx.beginPath(); ctx.roundRect(bx, byHP, bw, bh, 2); ctx.fill();
+      const hpCol = isElite ? '#ff3333' : isVet ? '#aa66ff' : '#cc0000';
+      ctx.fillStyle = hpCol;
+      ctx.beginPath(); ctx.roundRect(bx, byHP, bw * (this.hp / this.maxHp), bh, 2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.fillRect(bx + 1, byHP, bw * (this.hp / this.maxHp) - 2, bh * 0.4);
+    }
+
+    // Elite kanji marker
+    if (isElite) {
+      ctx.fillStyle = '#ffcc00';
+      ctx.shadowColor = '#ffaa00';
+      ctx.shadowBlur = 8;
+      ctx.font = 'bold 11px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('鬼', this.x, by - 52);
+      ctx.shadowBlur = 0;
+    }
+  }
+}
+
+// ==================== BOSS: JIN SAKAI ====================
+class JinSakai {
+  constructor(x, y) {
+    this.x = x; this.y = y;
+    this.w = 44; this.h = 64;
+    this.hp = 500; this.maxHp = 500;
+    this.speed = 120;
+    this.damage = 12;
+    this.attackRange = 65;
+    this.attackCooldown = 0;
+    this.hitFlash = 0;
+    this.knockbackX = 0; this.knockbackY = 0;
+    this.knockbackTimer = 0;
+    this.type = 'boss';
+    this.isBoss = true;
+    this.phase = 1;
+    this.dashTimer = 0;
+    this.dashCooldown = 2.5;
+    this.dashDx = 0; this.dashDy = 0;
+    this.slashActive = false;
+    this.slashTimer = 0;
+    this.breathTimer = 0;
+    this.moveAngle = 0;
+    this.circleTimer = 0;
+    this.walkCycle = 0;
+  }
+
+  update(dt, game) {
+    this.walkCycle += dt * 6;
+    if (this.knockbackTimer > 0) {
+      this.knockbackTimer -= dt;
+      this.x += this.knockbackX * dt;
+      this.y += this.knockbackY * dt;
+      return;
+    }
+    if (this.hitFlash > 0) this.hitFlash -= dt;
+
+    if (this.hp <= this.maxHp * 0.4 && this.phase === 1) {
+      this.phase = 2;
+      this.speed = 155;
+      this.damage = 16;
+      this.dashCooldown = 3;
+      game.floatingTexts.push(new FloatingText(this.x, this.y - 70, 'JIN SAKAI ENRAGED!', '#ff2222', 30));
+      screenShake = 0.3;
+      for (let i = 0; i < 25; i++) {
+        game.particles.push(new Particle(
+          this.x, this.y, ['#ff4444','#ff6666','#cc0000'][i%3],
+          (Math.random()-0.5)*400, (Math.random()-0.5)*400,
+          0.7, 4
+        ));
+      }
+    }
+
+    const p = game.player;
+    const dx = p.x - this.x;
+    const dy = p.y - this.y;
+    const dist = Math.hypot(dx, dy);
+
+    // Update boss HP bar
+    const bossBar = document.getElementById('boss-bar');
+    const bossHpFill = document.getElementById('boss-hp-fill');
+    bossBar.style.display = 'block';
+    bossHpFill.style.width = (this.hp / this.maxHp * 100) + '%';
+    if (this.phase === 2) {
+      bossHpFill.style.background = 'linear-gradient(to right, #aa2222, #ff4444, #ff6666)';
+      bossBar.querySelector('.boss-name').textContent = 'JIN SAKAI — THE GHOST (ENRAGED)';
+      bossBar.querySelector('.boss-name').style.color = '#ff4444';
+    }
+
+    if (this.dashTimer > 0) {
+      this.dashTimer -= dt;
+      this.x += this.dashDx * 420 * dt;
+      this.y += this.dashDy * 420 * dt;
+      if (dist < 55 && this.dashTimer > 0.05) {
+        p.takeDamage(this.damage, game);
+      }
+      game.particles.push(new Particle(
+        this.x, this.y, this.phase === 2 ? '#ff4444' : '#6688ff',
+        (Math.random()-0.5)*50, (Math.random()-0.5)*50,
+        0.3, 3, 0
+      ));
+      return;
+    }
+
+    this.dashCooldown -= dt;
+    this.breathTimer -= dt;
+
+    if (this.slashActive) {
+      this.slashTimer -= dt;
+      if (this.slashTimer <= 0) {
+        this.slashActive = false;
+        this.breathTimer = 0.6;
+      }
+      if (dist < this.attackRange + 15) {
+        if (this.attackCooldown <= 0) {
+          p.takeDamage(this.damage, game);
+          this.attackCooldown = 0.3;
+        }
+      }
+      this.attackCooldown -= dt;
+      return;
+    }
+
+    this.circleTimer -= dt;
+    if (this.circleTimer > 0 && dist < 200) {
+      this.moveAngle += (this.phase === 2 ? 2.5 : 1.8) * dt;
+      this.x = p.x + Math.cos(this.moveAngle) * 160;
+      this.y = p.y + Math.sin(this.moveAngle) * 160;
+    } else if (dist > this.attackRange) {
+      this.x += (dx/dist) * this.speed * dt;
+      this.y += (dy/dist) * this.speed * dt;
+    } else if (this.breathTimer <= 0) {
+      if (this.dashCooldown <= 0 && dist > 80) {
+        this.dashDx = dx/dist; this.dashDy = dy/dist;
+        this.dashTimer = 0.25;
+        this.dashCooldown = this.phase === 2 ? 3 : 4;
+        game.floatingTexts.push(new FloatingText(this.x, this.y - 50, 'DASH!', '#6688ff'));
+      } else {
+        this.slashActive = true;
+        this.slashTimer = this.phase === 2 ? 0.6 : 0.5;
+        this.attackCooldown = 0;
+        this.circleTimer = 2.0;
+        this.moveAngle = Math.atan2(this.y - p.y, this.x - p.x);
+      }
+    }
+
+    if (this.attackCooldown > 0) this.attackCooldown -= dt;
+    this.x = Math.max(22, Math.min(canvas.width - 22, this.x));
+    this.y = Math.max(32, Math.min(canvas.height - 32, this.y));
+  }
+
+  draw(ctx) {
+    const flash = this.hitFlash > 0;
+    const enraged = this.phase === 2;
+    const bob = Math.sin(this.walkCycle) * 2;
+    const by = this.y + bob;
+
+    // Ghost wind particles (dark smoke/leaves)
+    if (Math.random() < 0.35) {
+      const pCol = enraged ? `rgba(255,${60+Math.random()*40},30,0.5)` : `rgba(${30+Math.random()*20},${30+Math.random()*20},${30+Math.random()*20},0.6)`;
+      game.particles.push(new Particle(
+        this.x + (Math.random()-0.5)*44, by + (Math.random()-0.5)*44,
+        pCol, (Math.random()-0.5)*35, -25 - Math.random()*35, 0.5, 1.5 + Math.random(), -20
+      ));
+    }
+
+    // Dark aura
+    const auraGr = ctx.createRadialGradient(this.x, by, 10, this.x, by, 55 + Math.sin(globalTime * 3) * 8);
+    auraGr.addColorStop(0, enraged ? 'rgba(180,20,20,0.12)' : 'rgba(0,0,0,0.15)');
+    auraGr.addColorStop(0.5, enraged ? 'rgba(120,10,10,0.06)' : 'rgba(0,0,0,0.06)');
+    auraGr.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = auraGr;
+    ctx.beginPath(); ctx.arc(this.x, by, 60, 0, Math.PI*2); ctx.fill();
+
+    // Shadow
+    const shG = ctx.createRadialGradient(this.x, this.y + 30, 3, this.x, this.y + 30, 30);
+    shG.addColorStop(0, 'rgba(0,0,0,0.6)');
+    shG.addColorStop(0.5, 'rgba(0,0,0,0.25)');
+    shG.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = shG;
+    ctx.beginPath(); ctx.ellipse(this.x, this.y + 30, 30, 10, 0, 0, Math.PI*2); ctx.fill();
+
+    // === KATANA ON BACK (before body so it's behind) ===
+    // Scabbard diagonal across back
+    ctx.strokeStyle = '#1a1008';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 8, by + 8);
+    ctx.lineTo(this.x + 12, by - 48);
+    ctx.stroke();
+    // Scabbard wrap
+    ctx.strokeStyle = '#3a2810';
+    ctx.lineWidth = 0.8;
+    for (let i = 0; i < 8; i++) {
+      const t = i / 8;
+      const wx = this.x - 8 + 20 * t;
+      const wy = by + 8 - 56 * t;
+      ctx.beginPath(); ctx.moveTo(wx - 2, wy - 1); ctx.lineTo(wx + 2, wy + 1); ctx.stroke();
+    }
+
+    // === LEGS — black cloth wrappings ===
+    const legS = Math.sin(this.walkCycle) * 3;
+    for (const side of [-1, 1]) {
+      const legGr = ctx.createLinearGradient(0, by + 12, 0, by + 29);
+      legGr.addColorStop(0, flash ? '#eee' : '#1a1a1a');
+      legGr.addColorStop(1, flash ? '#ddd' : '#0a0a0a');
+      ctx.fillStyle = legGr;
+      ctx.save(); ctx.translate(this.x + 6*side, by + 12);
+      ctx.rotate(side * legS * 0.05);
+      ctx.beginPath();
+      ctx.moveTo(-5, 0); ctx.lineTo(5, 0); ctx.lineTo(4, 17); ctx.lineTo(-4, 17);
+      ctx.fill();
+      ctx.restore();
+    }
+    // Black tabi boots
+    ctx.fillStyle = flash ? '#ccc' : '#111';
+    ctx.fillRect(this.x - 12, by + 26, 11, 5);
+    ctx.fillRect(this.x + 1, by + 26, 11, 5);
+
+    // === BODY — black Ghost armor & cloth ===
+    const bodyGr = ctx.createLinearGradient(this.x - 15, by - 18, this.x + 15, by + 14);
+    bodyGr.addColorStop(0, flash ? '#fff' : (enraged ? '#2a0808' : '#151515'));
+    bodyGr.addColorStop(0.5, flash ? '#f5f5f5' : (enraged ? '#1a0505' : '#0e0e0e'));
+    bodyGr.addColorStop(1, flash ? '#eee' : (enraged ? '#100303' : '#080808'));
+    ctx.fillStyle = bodyGr;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 15, by - 18); ctx.lineTo(this.x + 15, by - 18);
+    ctx.lineTo(this.x + 13, by + 14); ctx.lineTo(this.x - 13, by + 14);
+    ctx.fill();
+
+    // Chest armor — dark iron with subtle detail
+    const arGr = ctx.createLinearGradient(this.x - 15, by - 18, this.x + 15, by);
+    arGr.addColorStop(0, enraged ? '#3a1010' : '#252525');
+    arGr.addColorStop(0.3, enraged ? '#4a1818' : '#333');
+    arGr.addColorStop(0.5, enraged ? '#3a1515' : '#2a2a2a');
+    arGr.addColorStop(1, enraged ? '#2a0a0a' : '#1a1a1a');
+    ctx.fillStyle = flash ? '#aaa' : arGr;
+    ctx.fillRect(this.x - 15, by - 18, 30, 16);
+    // Subtle plate lines
+    for (let i = 0; i < 3; i++) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(this.x - 14, by - 16 + i * 5);
+      ctx.lineTo(this.x + 14, by - 16 + i * 5);
+      ctx.stroke();
+    }
+
+    // Cloth wrappings on torso (black cloth like reference)
+    ctx.strokeStyle = enraged ? 'rgba(60,15,15,0.4)' : 'rgba(40,40,40,0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(this.x - 14, by - 10); ctx.lineTo(this.x + 10, by + 4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(this.x + 14, by - 10); ctx.lineTo(this.x - 10, by + 4); ctx.stroke();
+
+    // Dark obi
+    ctx.fillStyle = enraged ? '#2a0808' : '#1a1a1a';
+    ctx.fillRect(this.x - 14, by + 0, 28, 4);
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(this.x - 14, by + 0, 28, 4);
+
+    // Shoulder guards — dark iron plates
+    for (const side of [-1, 1]) {
+      const sGr = ctx.createLinearGradient(this.x + 15*side, by - 16, this.x + 28*side, by - 4);
+      sGr.addColorStop(0, enraged ? '#3a1515' : '#2a2a2a');
+      sGr.addColorStop(0.5, enraged ? '#4a2020' : '#383838');
+      sGr.addColorStop(1, enraged ? '#2a0a0a' : '#1a1a1a');
+      ctx.fillStyle = flash ? '#999' : sGr;
+      ctx.beginPath();
+      ctx.moveTo(this.x + 15*side, by - 16);
+      ctx.lineTo(this.x + 28*side, by - 12);
+      ctx.lineTo(this.x + 26*side, by - 3);
+      ctx.lineTo(this.x + 15*side, by - 1);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(this.x + 15*side, by - 16); ctx.lineTo(this.x + 28*side, by - 12);
+      ctx.stroke();
+    }
+
+    // === HEAD — black headband with cloth wrapping ===
+    // Neck (barely visible, covered by mask)
+    ctx.fillStyle = flash ? '#eee' : '#888';
+    ctx.fillRect(this.x - 4, by - 24, 8, 6);
+
+    // Head shape (mostly covered)
+    const headG = ctx.createRadialGradient(this.x, by - 34, 2, this.x, by - 32, 15);
+    headG.addColorStop(0, flash ? '#fff' : '#c8a070');
+    headG.addColorStop(0.5, flash ? '#f8f8f8' : '#b89060');
+    headG.addColorStop(1, flash ? '#eee' : '#a07848');
+    ctx.fillStyle = headG;
+    ctx.beginPath(); ctx.arc(this.x, by - 32, 15, 0, Math.PI*2); ctx.fill();
+
+    // === MENPO GHOST MASK — covers entire lower face, black iron ===
+    const maskGr = ctx.createRadialGradient(this.x, by - 27, 2, this.x, by - 27, 14);
+    maskGr.addColorStop(0, flash ? '#ddd' : (enraged ? '#3a0808' : '#2a2a2a'));
+    maskGr.addColorStop(0.5, flash ? '#ccc' : (enraged ? '#280505' : '#1a1a1a'));
+    maskGr.addColorStop(1, flash ? '#bbb' : (enraged ? '#1a0303' : '#0a0a0a'));
+    ctx.fillStyle = maskGr;
+    ctx.beginPath(); ctx.arc(this.x, by - 28, 13, -0.2, Math.PI + 0.2); ctx.fill();
+    // Mask nose ridge
+    ctx.strokeStyle = enraged ? '#4a1515' : '#333';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(this.x, by - 34); ctx.lineTo(this.x, by - 24); ctx.stroke();
+    // Mask mouth slit
+    ctx.strokeStyle = enraged ? '#220505' : '#111';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 6, by - 24);
+    ctx.quadraticCurveTo(this.x, by - 22.5, this.x + 6, by - 24);
+    ctx.stroke();
+    // Mask rivets
+    for (const side of [-1, 1]) {
+      ctx.fillStyle = '#444';
+      ctx.beginPath(); ctx.arc(this.x + 8*side, by - 28, 1, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(this.x + 6*side, by - 23, 0.8, 0, Math.PI*2); ctx.fill();
+    }
+
+    // === BLACK HEADBAND wrapping forehead ===
+    ctx.fillStyle = enraged ? '#1a0505' : '#111';
+    ctx.fillRect(this.x - 16, by - 38, 32, 5);
+    // Headband knot (hanging cloth on side)
+    ctx.fillStyle = enraged ? '#1a0505' : '#111';
+    const hbSway = Math.sin(globalTime * 2.5) * 3;
+    ctx.beginPath();
+    ctx.moveTo(this.x + 14, by - 36);
+    ctx.quadraticCurveTo(this.x + 20 + hbSway, by - 30, this.x + 18 + hbSway*1.5, by - 22);
+    ctx.lineTo(this.x + 15 + hbSway*1.5, by - 23);
+    ctx.quadraticCurveTo(this.x + 17 + hbSway*0.5, by - 30, this.x + 14, by - 34);
+    ctx.fill();
+    // Second cloth tail
+    ctx.beginPath();
+    ctx.moveTo(this.x + 15, by - 37);
+    ctx.quadraticCurveTo(this.x + 22 + hbSway*0.8, by - 32, this.x + 22 + hbSway*1.2, by - 26);
+    ctx.lineTo(this.x + 19 + hbSway*1.2, by - 27);
+    ctx.quadraticCurveTo(this.x + 19 + hbSway*0.5, by - 32, this.x + 15, by - 35);
+    ctx.fill();
+
+    // === EYES — narrow, intense, visible above mask ===
+    const eyeCol = enraged ? '#ff3300' : '#e8e0d0';
+    const eyeGlow = enraged ? '#ff0000' : 'rgba(0,0,0,0)';
+    if (enraged) {
+      ctx.globalAlpha = 0.3;
+      const eAura = ctx.createRadialGradient(this.x, by - 36, 3, this.x, by - 36, 14);
+      eAura.addColorStop(0, eyeGlow);
+      eAura.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = eAura;
+      ctx.beginPath(); ctx.arc(this.x, by - 36, 14, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    // Eye whites (narrow slits)
+    ctx.fillStyle = '#f0e8d8';
+    ctx.beginPath(); ctx.ellipse(this.x - 5, by - 36, 3.5, 1.5, -0.05, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(this.x + 5, by - 36, 3.5, 1.5, 0.05, 0, Math.PI*2); ctx.fill();
+    // Iris
+    ctx.fillStyle = enraged ? '#cc0000' : '#2a1a08';
+    ctx.beginPath(); ctx.arc(this.x - 5, by - 36, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(this.x + 5, by - 36, 1.5, 0, Math.PI*2); ctx.fill();
+    // Pupil
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(this.x - 5, by - 36, 0.7, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(this.x + 5, by - 36, 0.7, 0, Math.PI*2); ctx.fill();
+    if (enraged) {
+      ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 10;
+      ctx.fillStyle = 'rgba(255,50,0,0.6)';
+      ctx.beginPath(); ctx.ellipse(this.x - 5, by - 36, 3, 1.2, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(this.x + 5, by - 36, 3, 1.2, 0, 0, Math.PI*2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+    // Intense brows
+    ctx.strokeStyle = '#1a0e05';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(this.x - 9, by - 39); ctx.lineTo(this.x - 2, by - 37.5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(this.x + 9, by - 39); ctx.lineTo(this.x + 2, by - 37.5); ctx.stroke();
+
+    // === KATANA (held, pointing at player) ===
+    const kAngle = Math.atan2(
+      (game ? game.player.y : this.y) - this.y,
+      (game ? game.player.x : this.x) - this.x
+    );
+    const kPerpX = Math.cos(kAngle + Math.PI/2);
+    const kPerpY = Math.sin(kAngle + Math.PI/2);
+    const bsx = this.x + Math.cos(kAngle)*16;
+    const bsy = by - 5 + Math.sin(kAngle)*16;
+    const bex = this.x + Math.cos(kAngle)*68;
+    const bey = by - 5 + Math.sin(kAngle)*68;
+
+    // Blade glow (subtle for normal, intense for enraged)
+    const auraCol = enraged ? 'rgba(255,40,0,' : 'rgba(200,210,220,';
+    ctx.strokeStyle = auraCol + '0.15)';
+    ctx.lineWidth = 12;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(bsx, bsy); ctx.lineTo(bex, bey); ctx.stroke();
+
+    // Blade — clean steel
+    const blGr = ctx.createLinearGradient(
+      bsx + kPerpX*3, bsy + kPerpY*3,
+      bsx - kPerpX*3, bsy - kPerpY*3
+    );
+    blGr.addColorStop(0, '#777');
+    blGr.addColorStop(0.3, '#ddd');
+    blGr.addColorStop(0.5, flash ? '#fff' : '#eee');
+    blGr.addColorStop(0.7, '#c0c0c0');
+    blGr.addColorStop(1, '#888');
+    ctx.strokeStyle = blGr;
+    ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(bsx, bsy); ctx.lineTo(bex, bey); ctx.stroke();
+    // Hamon
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    for (let t = 0; t <= 1; t += 0.08) {
+      const px = bsx + (bex-bsx)*t + kPerpX*(1.5 + Math.sin(t*25)*0.6);
+      const py = bsy + (bey-bsy)*t + kPerpY*(1.5 + Math.sin(t*25)*0.6);
+      t === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    ctx.lineCap = 'butt'; ctx.lineWidth = 1;
+
+    // Slash arc
+    if (this.slashActive) {
+      for (let i = 0; i < 3; i++) {
+        ctx.strokeStyle = enraged
+          ? `rgba(255,50,20,${0.4 - i * 0.12})`
+          : `rgba(200,210,220,${0.3 - i * 0.08})`;
+        ctx.lineWidth = 6 - i * 2;
+        ctx.beginPath();
+        ctx.arc(this.x, by, this.attackRange + 15 - i * 5, kAngle - 1.2, kAngle + 1.2);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 1;
+    }
+  }
+}
+
+// ==================== BOSS: LORD SHIMURA ====================
+class LordShimura {
+  constructor(x, y) {
+    this.x = x; this.y = y;
+    this.w = 44; this.h = 64;
+    this.hp = 420; this.maxHp = 420;
+    this.speed = 110;
+    this.damage = 14;
+    this.attackRange = 70;
+    this.attackCooldown = 0;
+    this.hitFlash = 0;
+    this.knockbackX = 0; this.knockbackY = 0;
+    this.knockbackTimer = 0;
+    this.type = 'boss';
+    this.isBoss = true;
+    this.phase = 1;
+    this.slashActive = false;
+    this.slashTimer = 0;
+    this.breathTimer = 0;
+    this.moveAngle = 0;
+    this.circleTimer = 0;
+    this.walkCycle = 0;
+    this.parryTimer = 0;
+    this.parryCooldown = 0;
+  }
+
+  update(dt, game) {
+    this.walkCycle += dt * 6;
+    if (this.knockbackTimer > 0) {
+      this.knockbackTimer -= dt;
+      this.x += this.knockbackX * dt;
+      this.y += this.knockbackY * dt;
+      return;
+    }
+    if (this.hitFlash > 0) this.hitFlash -= dt;
+
+    if (this.hp <= this.maxHp * 0.4 && this.phase === 1) {
+      this.phase = 2;
+      this.speed = 140;
+      this.damage = 18;
+      game.floatingTexts.push(new FloatingText(this.x, this.y - 70, 'LORD SHIMURA UNLEASHED!', '#ffcc00', 30));
+      screenShake = 0.3;
+      for (let i = 0; i < 20; i++) {
+        game.particles.push(new Particle(
+          this.x, this.y, ['#ffcc44','#ffaa22','#cc8800'][i%3],
+          (Math.random()-0.5)*350, (Math.random()-0.5)*350,
+          0.7, 4
+        ));
+      }
+    }
+
+    const p = game.player;
+    const dx = p.x - this.x;
+    const dy = p.y - this.y;
+    const dist = Math.hypot(dx, dy);
+
+    // Boss HP bar
+    const bossBar = document.getElementById('boss-bar');
+    const bossHpFill = document.getElementById('boss-hp-fill');
+    bossBar.style.display = 'block';
+    bossHpFill.style.width = (this.hp / this.maxHp * 100) + '%';
+    bossHpFill.style.background = this.phase === 2
+      ? 'linear-gradient(to right, #cc8800, #ffcc44, #ffee88)'
+      : 'linear-gradient(to right, #886622, #ccaa44, #eebb44)';
+    bossBar.querySelector('.boss-name').textContent = this.phase === 2
+      ? 'LORD SHIMURA — THE JITO (UNLEASHED)' : 'LORD SHIMURA — THE JITO';
+    bossBar.querySelector('.boss-name').style.color = this.phase === 2 ? '#ffcc44' : '#ccaa44';
+
+    // Parry mechanic — sometimes blocks and counters
+    if (this.parryTimer > 0) {
+      this.parryTimer -= dt;
+      return;
+    }
+
+    // Movement — circles then strikes
+    this.circleTimer += dt;
+    if (dist > this.attackRange) {
+      const nd = dx / dist, ndy = dy / dist;
+      if (this.circleTimer < 2) {
+        const ca = Math.atan2(dy, dx) + 1.2;
+        this.x += Math.cos(ca) * this.speed * dt;
+        this.y += Math.sin(ca) * this.speed * dt;
+      } else {
+        this.x += nd * this.speed * 1.3 * dt;
+        this.y += ndy * this.speed * 1.3 * dt;
+        if (this.circleTimer > 3.5) this.circleTimer = 0;
+      }
+    } else {
+      if (this.attackCooldown <= 0) {
+        this.slashActive = true;
+        this.slashTimer = 0.25;
+        this.attackCooldown = this.phase === 2 ? 0.8 : 1.2;
+        if (dist < this.attackRange) {
+          p.takeDamage(this.damage, game);
+          screenShake = 0.08;
+        }
+      }
+    }
+
+    if (this.slashTimer > 0) {
+      this.slashTimer -= dt;
+      if (this.slashTimer <= 0) this.slashActive = false;
+    }
+    if (this.attackCooldown > 0) this.attackCooldown -= dt;
+
+    // Parry counter — when hit in phase 2, sometimes parries
+    if (this.parryCooldown > 0) this.parryCooldown -= dt;
+
+    this.x = Math.max(20, Math.min(canvas.width - 20, this.x));
+    this.y = Math.max(30, Math.min(canvas.height - 30, this.y));
+  }
+
+  takeDamage(dmg, game) {
+    // Phase 2 parry chance
+    if (this.phase === 2 && this.parryCooldown <= 0 && Math.random() < 0.2) {
+      this.parryTimer = 0.4;
+      this.parryCooldown = 3;
+      game.floatingTexts.push(new FloatingText(this.x, this.y - 50, 'PARRIED!', '#ffcc44', 22));
+      screenShake = 0.1;
+      // Counter damage
+      const p = game.player;
+      p.takeDamage(8, game);
+      for (let i = 0; i < 8; i++) {
+        game.particles.push(new Particle(
+          this.x, this.y - 10, '#ffcc44',
+          (Math.random()-0.5)*200, (Math.random()-0.5)*200,
+          0.3, 3
+        ));
+      }
+      return;
+    }
+    this.hp -= dmg;
+    this.hitFlash = 0.12;
+    this.knockbackX = (this.x - game.player.x) * 3;
+    this.knockbackY = (this.y - game.player.y) * 3;
+    this.knockbackTimer = 0.1;
+  }
+
+  draw(ctx) {
+    const flash = this.hitFlash > 0;
+    const unleashed = this.phase === 2;
+    const bob = Math.sin(this.walkCycle) * 2;
+    const by = this.y + bob;
+
+    // Golden aura
+    const auraGr = ctx.createRadialGradient(this.x, by, 10, this.x, by, 55 + Math.sin(globalTime * 3) * 8);
+    auraGr.addColorStop(0, unleashed ? 'rgba(255,180,40,0.15)' : 'rgba(200,160,40,0.08)');
+    auraGr.addColorStop(0.5, unleashed ? 'rgba(200,140,20,0.06)' : 'rgba(160,120,20,0.03)');
+    auraGr.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = auraGr;
+    ctx.beginPath(); ctx.arc(this.x, by, 60, 0, Math.PI*2); ctx.fill();
+
+    // Shadow
+    const shG = ctx.createRadialGradient(this.x, this.y + 30, 3, this.x, this.y + 30, 30);
+    shG.addColorStop(0, 'rgba(0,0,0,0.5)');
+    shG.addColorStop(0.5, 'rgba(0,0,0,0.2)');
+    shG.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = shG;
+    ctx.beginPath(); ctx.ellipse(this.x, this.y + 30, 30, 10, 0, 0, Math.PI*2); ctx.fill();
+
+    // Parry flash shield
+    if (this.parryTimer > 0) {
+      ctx.globalAlpha = this.parryTimer * 2;
+      ctx.strokeStyle = '#ffcc44';
+      ctx.shadowColor = '#ffcc44';
+      ctx.shadowBlur = 20;
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(this.x, by, 35, 0, Math.PI*2); ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+    }
+
+    // === LEGS — dark hakama ===
+    const legS = Math.sin(this.walkCycle) * 3;
+    for (const side of [-1, 1]) {
+      const legGr = ctx.createLinearGradient(0, by + 12, 0, by + 29);
+      legGr.addColorStop(0, flash ? '#eee' : '#1a1828');
+      legGr.addColorStop(1, flash ? '#ddd' : '#0a0a15');
+      ctx.fillStyle = legGr;
+      ctx.save(); ctx.translate(this.x + 6*side, by + 12);
+      ctx.rotate(side * legS * 0.05);
+      ctx.beginPath();
+      ctx.moveTo(-5, 0); ctx.lineTo(5, 0); ctx.lineTo(4, 17); ctx.lineTo(-4, 17);
+      ctx.fill();
+      ctx.restore();
+    }
+    // Boots
+    ctx.fillStyle = flash ? '#ddd' : '#2a2018';
+    ctx.fillRect(this.x - 12, by + 26, 11, 5);
+    ctx.fillRect(this.x + 1, by + 26, 11, 5);
+
+    // === BODY — dark blue/black kimono ===
+    const bodyGr = ctx.createLinearGradient(this.x - 15, by - 18, this.x + 15, by + 14);
+    bodyGr.addColorStop(0, flash ? '#fff' : '#1a1830');
+    bodyGr.addColorStop(0.5, flash ? '#f5f5f5' : '#141428');
+    bodyGr.addColorStop(1, flash ? '#eee' : '#0e0e1e');
+    ctx.fillStyle = bodyGr;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 15, by - 18); ctx.lineTo(this.x + 15, by - 18);
+    ctx.lineTo(this.x + 13, by + 14); ctx.lineTo(this.x - 13, by + 14);
+    ctx.fill();
+
+    // Gold embroidery pattern on kimono
+    ctx.strokeStyle = 'rgba(200,160,60,0.15)';
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 8, by - 12);
+    ctx.quadraticCurveTo(this.x, by - 6, this.x + 8, by - 12);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(this.x - 6, by - 4);
+    ctx.quadraticCurveTo(this.x, by + 1, this.x + 6, by - 4);
+    ctx.stroke();
+
+    // Chest armor — ornate bronze/dark with gold trim
+    const arGr = ctx.createLinearGradient(this.x - 15, by - 18, this.x + 15, by - 2);
+    arGr.addColorStop(0, flash ? '#ffe0b0' : '#3a3040');
+    arGr.addColorStop(0.3, flash ? '#ffd090' : '#4a3848');
+    arGr.addColorStop(0.5, flash ? '#ffcc80' : '#3a2838');
+    arGr.addColorStop(1, flash ? '#ffbb70' : '#2a1828');
+    ctx.fillStyle = arGr;
+    ctx.fillRect(this.x - 15, by - 18, 30, 16);
+    // Gold trim lines
+    ctx.strokeStyle = 'rgba(200,160,60,0.3)';
+    ctx.lineWidth = 0.8;
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(this.x - 14, by - 16 + i * 4);
+      ctx.lineTo(this.x + 14, by - 16 + i * 4);
+      ctx.stroke();
+    }
+    // Red lacing cords on armor
+    ctx.strokeStyle = '#aa3030';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(this.x - 5, by - 16); ctx.lineTo(this.x - 5, by - 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(this.x + 5, by - 16); ctx.lineTo(this.x + 5, by - 2); ctx.stroke();
+    // Red lacing knots
+    ctx.fillStyle = '#cc4040';
+    ctx.beginPath(); ctx.arc(this.x - 5, by - 9, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(this.x + 5, by - 9, 1.5, 0, Math.PI*2); ctx.fill();
+
+    // Obi — gold/red
+    const obiGr = ctx.createLinearGradient(this.x - 14, by, this.x + 14, by + 5);
+    obiGr.addColorStop(0, '#8a6822');
+    obiGr.addColorStop(0.5, '#ccaa44');
+    obiGr.addColorStop(1, '#8a6822');
+    ctx.fillStyle = obiGr;
+    ctx.fillRect(this.x - 14, by + 0, 28, 5);
+    // Pink gem buckle
+    ctx.fillStyle = '#cc6688';
+    ctx.beginPath(); ctx.arc(this.x, by + 2.5, 2, 0, Math.PI*2); ctx.fill();
+
+    // === MASSIVE SODE (shoulder guards) with red lacing ===
+    for (const side of [-1, 1]) {
+      // Main sode plate — layered bronze/dark
+      const sGr = ctx.createLinearGradient(this.x + 15*side, by - 18, this.x + 32*side, by + 2);
+      sGr.addColorStop(0, flash ? '#ffe0b0' : '#5a4838');
+      sGr.addColorStop(0.3, flash ? '#ffd090' : '#6a5848');
+      sGr.addColorStop(0.5, flash ? '#ffcc80' : '#5a4838');
+      sGr.addColorStop(1, flash ? '#ffbb70' : '#3a2818');
+      ctx.fillStyle = sGr;
+      ctx.beginPath();
+      ctx.moveTo(this.x + 14*side, by - 18);
+      ctx.lineTo(this.x + 32*side, by - 14);
+      ctx.lineTo(this.x + 30*side, by + 2);
+      ctx.lineTo(this.x + 14*side, by - 1);
+      ctx.fill();
+      // Layered plate rows
+      for (let r = 0; r < 4; r++) {
+        const ry = by - 16 + r * 4;
+        ctx.strokeStyle = 'rgba(200,160,80,0.2)';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(this.x + 15*side, ry);
+        ctx.lineTo(this.x + 30*side, ry + 2*side);
+        ctx.stroke();
+      }
+      // Red lacing on sode
+      ctx.strokeStyle = '#aa3030';
+      ctx.lineWidth = 0.8;
+      for (let r = 0; r < 3; r++) {
+        const ry = by - 14 + r * 5;
+        ctx.beginPath();
+        ctx.moveTo(this.x + 16*side, ry);
+        ctx.lineTo(this.x + 28*side, ry + 1.5);
+        ctx.stroke();
+      }
+      // Gold edge trim
+      ctx.strokeStyle = 'rgba(200,160,60,0.35)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(this.x + 14*side, by - 18);
+      ctx.lineTo(this.x + 32*side, by - 14);
+      ctx.stroke();
+    }
+
+    // Neck
+    ctx.fillStyle = flash ? '#eee' : '#c8a070';
+    ctx.fillRect(this.x - 4, by - 24, 8, 6);
+
+    // Head
+    const headG = ctx.createRadialGradient(this.x - 2, by - 34, 2, this.x, by - 32, 15);
+    headG.addColorStop(0, flash ? '#fff' : '#d8b080');
+    headG.addColorStop(0.5, flash ? '#f8f8f8' : '#c8a068');
+    headG.addColorStop(1, flash ? '#eee' : '#a88050');
+    ctx.fillStyle = headG;
+    ctx.beginPath(); ctx.arc(this.x, by - 32, 15, 0, Math.PI*2); ctx.fill();
+
+    // Goatee beard (thin, pointed)
+    ctx.fillStyle = '#3a3038';
+    ctx.beginPath();
+    ctx.moveTo(this.x - 3, by - 24);
+    ctx.quadraticCurveTo(this.x - 4, by - 20, this.x - 2, by - 16);
+    ctx.quadraticCurveTo(this.x, by - 14, this.x + 2, by - 16);
+    ctx.quadraticCurveTo(this.x + 4, by - 20, this.x + 3, by - 24);
+    ctx.fill();
+    // Mustache
+    ctx.strokeStyle = '#3a3038';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 1, by - 26);
+    ctx.quadraticCurveTo(this.x - 5, by - 25, this.x - 7, by - 24);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(this.x + 1, by - 26);
+    ctx.quadraticCurveTo(this.x + 5, by - 25, this.x + 7, by - 24);
+    ctx.stroke();
+
+    // Eyes — stern, authoritative
+    ctx.fillStyle = '#f0e8d8';
+    ctx.beginPath(); ctx.ellipse(this.x - 5, by - 34, 3, 1.8, -0.05, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(this.x + 5, by - 34, 3, 1.8, 0.05, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#1a0e05';
+    ctx.beginPath(); ctx.arc(this.x - 5, by - 34, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(this.x + 5, by - 34, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(this.x - 5, by - 34, 0.7, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(this.x + 5, by - 34, 0.7, 0, Math.PI*2); ctx.fill();
+    // Stern brows
+    ctx.strokeStyle = '#2a1a08';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(this.x - 9, by - 37); ctx.lineTo(this.x - 2, by - 35.5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(this.x + 9, by - 37); ctx.lineTo(this.x + 2, by - 35.5); ctx.stroke();
+
+    // === ORNATE KABUTO — bronze with massive curved horns ===
+    // Helmet dome — multi-plate bronze
+    const helmGr = ctx.createLinearGradient(this.x - 18, by - 52, this.x + 18, by - 30);
+    helmGr.addColorStop(0, flash ? '#ffe8c0' : '#6a5030');
+    helmGr.addColorStop(0.25, flash ? '#ffe0a0' : '#9a7848');
+    helmGr.addColorStop(0.4, flash ? '#ffd880' : '#c8a060');
+    helmGr.addColorStop(0.5, flash ? '#ffd070' : '#dab878');
+    helmGr.addColorStop(0.6, flash ? '#ffd880' : '#c8a060');
+    helmGr.addColorStop(0.75, flash ? '#ffe0a0' : '#9a7848');
+    helmGr.addColorStop(1, flash ? '#ffe8c0' : '#6a5030');
+    ctx.fillStyle = helmGr;
+    ctx.beginPath(); ctx.arc(this.x, by - 36, 18, Math.PI, 0); ctx.fill();
+
+    // Riveted plate lines on kabuto
+    ctx.strokeStyle = 'rgba(200,160,80,0.3)';
+    ctx.lineWidth = 0.6;
+    for (let r = 0; r < 6; r++) {
+      const a = Math.PI + (r / 6) * Math.PI;
+      ctx.beginPath();
+      ctx.moveTo(this.x + Math.cos(a) * 18, by - 36 + Math.sin(a) * 18);
+      ctx.lineTo(this.x, by - 54);
+      ctx.stroke();
+    }
+    // Rivets along plates
+    for (let r = 0; r < 6; r++) {
+      const a = Math.PI + (r / 6) * Math.PI + 0.26;
+      const rx = this.x + Math.cos(a) * 14;
+      const ry2 = by - 36 + Math.sin(a) * 14;
+      ctx.fillStyle = '#dab878';
+      ctx.beginPath(); ctx.arc(rx, ry2, 1, 0, Math.PI*2); ctx.fill();
+    }
+
+    // Helmet brim — gold band
+    const brimGr = ctx.createLinearGradient(0, by - 32, 0, by - 28);
+    brimGr.addColorStop(0, flash ? '#fff' : '#dab878');
+    brimGr.addColorStop(0.5, flash ? '#eee' : '#b89848');
+    brimGr.addColorStop(1, flash ? '#ddd' : '#8a6828');
+    ctx.fillStyle = brimGr;
+    ctx.fillRect(this.x - 19, by - 31, 38, 4);
+
+    // Red lacing cords hanging from helmet
+    ctx.strokeStyle = '#cc3030';
+    ctx.lineWidth = 2;
+    const cordSway = Math.sin(globalTime * 2) * 3;
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(this.x + 10*side, by - 30);
+      ctx.quadraticCurveTo(this.x + 12*side + cordSway*side, by - 22, this.x + 10*side + cordSway*side*1.5, by - 14);
+      ctx.stroke();
+    }
+    // Center cord
+    ctx.beginPath();
+    ctx.moveTo(this.x, by - 30);
+    ctx.quadraticCurveTo(this.x + cordSway*0.5, by - 22, this.x + cordSway, by - 16);
+    ctx.stroke();
+    // Cord knot at chin
+    ctx.fillStyle = '#cc3030';
+    ctx.beginPath(); ctx.arc(this.x + cordSway, by - 16, 3, 0, Math.PI*2); ctx.fill();
+
+    // === MASSIVE CURVED BULL HORNS ===
+    for (const side of [-1, 1]) {
+      const hornGr = ctx.createLinearGradient(this.x + 16*side, by - 36, this.x + 40*side, by - 58);
+      hornGr.addColorStop(0, flash ? '#ffe8c0' : '#9a7848');
+      hornGr.addColorStop(0.3, flash ? '#ffe0a0' : '#c8a060');
+      hornGr.addColorStop(0.6, flash ? '#ffd880' : '#dab878');
+      hornGr.addColorStop(1, flash ? '#ffc860' : '#8a6828');
+      ctx.fillStyle = hornGr;
+      // Thick curved horn
+      ctx.beginPath();
+      ctx.moveTo(this.x + 14*side, by - 34);
+      ctx.bezierCurveTo(
+        this.x + 25*side, by - 42,
+        this.x + 35*side, by - 52,
+        this.x + 38*side, by - 60
+      );
+      ctx.lineTo(this.x + 35*side, by - 58);
+      ctx.bezierCurveTo(
+        this.x + 30*side, by - 50,
+        this.x + 20*side, by - 40,
+        this.x + 10*side, by - 32
+      );
+      ctx.fill();
+      // Horn tip shine
+      ctx.fillStyle = 'rgba(255,240,200,0.5)';
+      ctx.beginPath(); ctx.arc(this.x + 37*side, by - 59, 1.5, 0, Math.PI*2); ctx.fill();
+    }
+
+    // Golden maedate (front crest — circular emblem)
+    const diskGr = ctx.createRadialGradient(this.x, by - 40, 1, this.x, by - 40, 6);
+    diskGr.addColorStop(0, '#ffe8a0');
+    diskGr.addColorStop(0.4, '#dab868');
+    diskGr.addColorStop(1, '#9a7838');
+    ctx.fillStyle = flash ? '#fff' : diskGr;
+    ctx.beginPath(); ctx.arc(this.x, by - 40, 5, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#c8a44e';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    // Inner ring
+    ctx.strokeStyle = '#b89838';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.arc(this.x, by - 40, 3, 0, Math.PI*2); ctx.stroke();
+
+    // Shikoro (neck guard) — bronze layered plates
+    const shikGr = ctx.createLinearGradient(0, by - 30, 0, by - 20);
+    shikGr.addColorStop(0, '#9a7848');
+    shikGr.addColorStop(0.5, '#7a5830');
+    shikGr.addColorStop(1, '#5a3818');
+    ctx.fillStyle = flash ? '#ffe0b0' : shikGr;
+    ctx.beginPath();
+    ctx.moveTo(this.x - 17, by - 28);
+    ctx.lineTo(this.x - 20, by - 18);
+    ctx.lineTo(this.x + 20, by - 18);
+    ctx.lineTo(this.x + 17, by - 28);
+    ctx.fill();
+    // Red lacing on shikoro
+    ctx.strokeStyle = '#aa3030';
+    ctx.lineWidth = 0.6;
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(this.x - 18 + i, by - 27 + i * 2);
+      ctx.lineTo(this.x + 18 - i, by - 27 + i * 2);
+      ctx.stroke();
+    }
+
+    // === KATANA ===
+    const kAngle = Math.atan2(
+      (game ? game.player.y : this.y) - this.y,
+      (game ? game.player.x : this.x) - this.x
+    );
+    const kPerpX = Math.cos(kAngle + Math.PI/2);
+    const kPerpY = Math.sin(kAngle + Math.PI/2);
+    const bsx = this.x + Math.cos(kAngle)*16;
+    const bsy = by - 5 + Math.sin(kAngle)*16;
+    const bex = this.x + Math.cos(kAngle)*62;
+    const bey = by - 5 + Math.sin(kAngle)*62;
+
+    // Blade glow
+    if (this.slashActive || unleashed) {
+      ctx.strokeStyle = unleashed ? 'rgba(255,180,40,0.2)' : 'rgba(220,200,160,0.12)';
+      ctx.lineWidth = 12;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(bsx, bsy); ctx.lineTo(bex, bey); ctx.stroke();
+    }
+
+    // Blade
+    const blGr = ctx.createLinearGradient(
+      bsx + kPerpX*3, bsy + kPerpY*3,
+      bsx - kPerpX*3, bsy - kPerpY*3
+    );
+    blGr.addColorStop(0, '#777');
+    blGr.addColorStop(0.3, '#ddd');
+    blGr.addColorStop(0.5, flash ? '#fff' : '#eee');
+    blGr.addColorStop(0.7, '#c0c0c0');
+    blGr.addColorStop(1, '#888');
+    ctx.strokeStyle = blGr;
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(bsx, bsy); ctx.lineTo(bex, bey); ctx.stroke();
+    ctx.lineCap = 'butt'; ctx.lineWidth = 1;
+
+    // Slash arc
+    if (this.slashActive) {
+      for (let i = 0; i < 3; i++) {
+        ctx.strokeStyle = unleashed
+          ? `rgba(255,180,40,${0.35 - i * 0.1})`
+          : `rgba(200,180,140,${0.3 - i * 0.08})`;
+        ctx.lineWidth = 5 - i * 1.5;
+        ctx.beginPath();
+        ctx.arc(this.x, by, this.attackRange + 10 - i * 5, kAngle - 1.1, kAngle + 1.1);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 1;
+    }
+  }
+}
+
+// ==================== GAME ====================
+class Game {
+  constructor() {
+    this.state = 'playing';
+    this.player = new Player(canvas.width / 2, canvas.height / 2);
+    this.enemies = [];
+    this.particles = [];
+    this.floatingTexts = [];
+    this.wave = 1;
+    this.kills = 0;
+    this.score = 0;
+    this.announcing = false;
+    this.announceTimer = 0;
+    // Rich ground
+    this.grassBlades = [];
+    this.groundStones = [];
+    for (let i = 0; i < 300; i++) {
+      this.grassBlades.push({
+        x: Math.random() * 2200, y: Math.random() * 1400,
+        h: 6 + Math.random() * 12,
+        phase: Math.random() * Math.PI * 2,
+        color: `rgb(${50 + Math.random()*40},${45 + Math.random()*30},${20 + Math.random()*20})`
+      });
+    }
+    for (let i = 0; i < 30; i++) {
+      this.groundStones.push({
+        x: Math.random() * 2200, y: Math.random() * 1400,
+        size: 2 + Math.random() * 5,
+        color: `rgba(${55 + Math.random()*25},${48 + Math.random()*20},${35 + Math.random()*15},${0.3 + Math.random()*0.2})`
+      });
+    }
+    // Ambient particles
+    this.ambientParticles = [];
+    for (let i = 0; i < 15; i++) {
+      this.ambientParticles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: 10 + Math.random() * 20,
+        vy: -2 + Math.random() * 4,
+        size: 1 + Math.random() * 2,
+        alpha: 0.1 + Math.random() * 0.15
+      });
+    }
+    this.spawnWave();
+  }
+
+  spawnWave() {
+    this.announcing = true;
+    this.announceTimer = 2.2;
+    const announce = document.getElementById('wave-announce');
+    if (this.wave === 30) {
+      announce.innerHTML = 'FINAL WAVE<br><span style="font-size:34px;color:#88aaff;font-family:Cinzel Decorative,serif;">JIN SAKAI — THE GHOST</span>';
+    } else if (this.wave === 29) {
+      announce.innerHTML = 'BOSS WAVE<br><span style="font-size:34px;color:#ffcc44;font-family:Cinzel Decorative,serif;">LORD SHIMURA — THE JITO</span>';
+    } else {
+      announce.textContent = `Wave ${this.wave}`;
+    }
+    announce.style.opacity = 1;
+
+    setTimeout(() => {
+      if (this.wave === 30) {
+        this.enemies.push(new JinSakai(canvas.width / 2, -50));
+        for (let i = 0; i < 3; i++) {
+          const angle = (i / 3) * Math.PI * 2;
+          this.enemies.push(new Samurai(
+            canvas.width / 2 + Math.cos(angle) * 150,
+            -50 + Math.sin(angle) * 80, 17
+          ));
+        }
+      } else if (this.wave === 29) {
+        this.enemies.push(new LordShimura(canvas.width / 2, -50));
+        for (let i = 0; i < 4; i++) {
+          const angle = (i / 4) * Math.PI * 2;
+          this.enemies.push(new Samurai(
+            canvas.width / 2 + Math.cos(angle) * 160,
+            -50 + Math.sin(angle) * 90, 15
+          ));
+        }
+      } else {
+        const count = 3 + this.wave;
+        for (let i = 0; i < count; i++) {
+          let x, y;
+          const side = Math.floor(Math.random() * 4);
+          switch (side) {
+            case 0: x = Math.random() * canvas.width; y = -30; break;
+            case 1: x = Math.random() * canvas.width; y = canvas.height + 30; break;
+            case 2: x = -30; y = Math.random() * canvas.height; break;
+            case 3: x = canvas.width + 30; y = Math.random() * canvas.height; break;
+          }
+          this.enemies.push(new Samurai(x, y, this.wave));
+        }
+      }
+    }, 1200);
+  }
+
+  update(dt) {
+    if (this.state !== 'playing') return;
+
+    if (this.announcing) {
+      this.announceTimer -= dt;
+      if (this.announceTimer <= 0) {
+        this.announcing = false;
+        document.getElementById('wave-announce').style.opacity = 0;
+      }
+    }
+
+    this.player.update(dt, this);
+    this.enemies = this.enemies.filter(e => e.hp > 0);
+    for (const e of this.enemies) e.update(dt, this);
+
+    this.particles.forEach(p => p.update(dt));
+    this.particles = this.particles.filter(p => p.life > 0);
+    this.floatingTexts.forEach(t => t.update(dt));
+    this.floatingTexts = this.floatingTexts.filter(t => t.life > 0);
+
+    // Ambient
+    for (const a of this.ambientParticles) {
+      a.x += a.vx * dt;
+      a.y += a.vy * dt;
+      if (a.x > canvas.width + 10) { a.x = -10; a.y = Math.random() * canvas.height; }
+    }
+
+    // Hide boss bar if no boss alive
+    if (!this.enemies.some(e => e.isBoss)) {
+      document.getElementById('boss-bar').style.display = 'none';
+    }
+
+    if (this.enemies.length === 0 && !this.announcing) {
+      if (this.wave >= 30) {
+        this.state = 'win';
+        document.getElementById('boss-bar').style.display = 'none';
+      } else {
+        this.wave++;
+        const heal = 20;
+        this.player.hp = Math.min(this.player.maxHp, this.player.hp + heal);
+        this.floatingTexts.push(new FloatingText(this.player.x, this.player.y - 60, `+${heal} HP`, '#44ff44'));
+        // Refill 1 heal charge per wave (max 5)
+        if (this.player.healCharges < 4) {
+          this.player.healCharges++;
+          this.floatingTexts.push(new FloatingText(this.player.x + 30, this.player.y - 75, '+1 Heal', '#44ff88'));
+        }
+        this.spawnWave();
+      }
+    }
+
+    // HUD
+    document.getElementById('health-bar').style.width = (this.player.hp / this.player.maxHp * 100) + '%';
+    document.getElementById('hp-text').textContent = `${Math.ceil(this.player.hp)}/${this.player.maxHp}`;
+    document.getElementById('wave-num').textContent = this.wave;
+    document.getElementById('kill-count').textContent = this.kills;
+    document.getElementById('score-display').textContent = this.score;
+    document.getElementById('heal-charges').textContent = this.player.healCharges;
+
+    const combo = document.getElementById('combo-display');
+    if (this.player.combo >= 3) {
+      combo.textContent = `${this.player.combo}x COMBO`;
+      combo.style.opacity = 1;
+      combo.style.fontSize = Math.min(50, 30 + this.player.combo * 2) + 'px';
+    } else {
+      combo.style.opacity = 0;
+    }
+
+    // Clear one-shot key presses at end of frame
+    justPressed = {};
+  }
+
+  draw() {
+    // Reset ALL state and clear
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'rgba(0,0,0,0)';
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    // === TSUSHIMA BATTLEFIELD BACKGROUND ===
+
+    // Sky gradient — sunset amber to deep purple (brighter)
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.38);
+    skyGrad.addColorStop(0, '#2a1838');
+    skyGrad.addColorStop(0.2, '#3a2035');
+    skyGrad.addColorStop(0.4, '#6a3030');
+    skyGrad.addColorStop(0.6, '#aa5530');
+    skyGrad.addColorStop(0.8, '#dd8838');
+    skyGrad.addColorStop(1, '#eea040');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height * 0.38);
+
+    // Sun glow on horizon
+    const sunX = canvas.width * 0.45;
+    const sunY = canvas.height * 0.28;
+    const sunGr = ctx.createRadialGradient(sunX, sunY, 5, sunX, sunY, 150);
+    sunGr.addColorStop(0, 'rgba(255,230,120,0.8)');
+    sunGr.addColorStop(0.1, 'rgba(255,200,80,0.5)');
+    sunGr.addColorStop(0.3, 'rgba(240,140,50,0.2)');
+    sunGr.addColorStop(0.6, 'rgba(200,80,30,0.08)');
+    sunGr.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = sunGr;
+    ctx.fillRect(0, 0, canvas.width, canvas.height * 0.4);
+
+    // Wispy sunset clouds
+    ctx.globalAlpha = 0.08;
+    for (let c = 0; c < 6; c++) {
+      const cx = (c * 170 + 50 + Math.sin(globalTime * 0.15 + c) * 15) % (canvas.width + 100) - 50;
+      const cy = canvas.height * (0.08 + c * 0.035) + Math.sin(c * 2.3) * 10;
+      const cw = 80 + Math.sin(c * 1.7) * 40;
+      const ch = 6 + Math.sin(c * 2.1) * 3;
+      const cloudGr = ctx.createRadialGradient(cx, cy, cw * 0.1, cx, cy, cw);
+      cloudGr.addColorStop(0, '#ff9944');
+      cloudGr.addColorStop(0.4, '#cc6633');
+      cloudGr.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = cloudGr;
+      ctx.beginPath(); ctx.ellipse(cx, cy, cw, ch, 0.1, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Far mountains (misty purple with snow caps)
+    const farMtnGr = ctx.createLinearGradient(0, canvas.height * 0.16, 0, canvas.height * 0.35);
+    farMtnGr.addColorStop(0, '#5a3548');
+    farMtnGr.addColorStop(0.3, '#4a2838');
+    farMtnGr.addColorStop(1, '#3a1e2a');
+    ctx.fillStyle = farMtnGr;
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height * 0.28);
+    for (let x = 0; x <= canvas.width; x += 12) {
+      const peak = Math.sin(x * 0.002 + 0.8) * 35 + Math.sin(x * 0.005) * 18 + Math.sin(x * 0.012) * 8;
+      ctx.lineTo(x, canvas.height * 0.28 - peak);
+    }
+    ctx.lineTo(canvas.width, canvas.height * 0.35);
+    ctx.lineTo(0, canvas.height * 0.35);
+    ctx.fill();
+    // Snow caps on far mountains
+    ctx.globalAlpha = 0.12;
+    ctx.fillStyle = '#e0d8d0';
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height * 0.28);
+    for (let x = 0; x <= canvas.width; x += 12) {
+      const peak = Math.sin(x * 0.002 + 0.8) * 35 + Math.sin(x * 0.005) * 18 + Math.sin(x * 0.012) * 8;
+      const snowLine = peak > 30 ? peak - 5 : peak - 15;
+      ctx.lineTo(x, canvas.height * 0.28 - Math.max(peak - 3, snowLine));
+    }
+    ctx.lineTo(canvas.width, canvas.height * 0.28);
+    ctx.lineTo(0, canvas.height * 0.28);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Near mountains (darker, more textured)
+    const nearMtnGr = ctx.createLinearGradient(0, canvas.height * 0.24, 0, canvas.height * 0.38);
+    nearMtnGr.addColorStop(0, '#3a2028');
+    nearMtnGr.addColorStop(1, '#2a1518');
+    ctx.fillStyle = nearMtnGr;
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height * 0.32);
+    for (let x = 0; x <= canvas.width; x += 10) {
+      ctx.lineTo(x, canvas.height * 0.32 - Math.sin(x * 0.003 + 2) * 25 - Math.sin(x * 0.008) * 12 - Math.sin(x * 0.02) * 4);
+    }
+    ctx.lineTo(canvas.width, canvas.height * 0.38);
+    ctx.lineTo(0, canvas.height * 0.38);
+    ctx.fill();
+
+    // Tree line silhouettes (varied — pines, maples, bamboo)
+    const treeBase = canvas.height * 0.33;
+    for (let x = 3; x < canvas.width; x += 12 + Math.sin(x * 0.15) * 6) {
+      const ty = treeBase - Math.sin(x * 0.003 + 2) * 20;
+      const th = 14 + Math.sin(x * 0.35) * 10;
+      const treeType = Math.floor(Math.sin(x * 0.7 + 1.3) * 3 + 3) % 3;
+      // Depth-based color (further = lighter/mistier)
+      const depthF = Math.sin(x * 0.003 + 2) * 0.3;
+      ctx.fillStyle = `rgb(${Math.round(30 + depthF*10)},${Math.round(20 + depthF*8)},${Math.round(18 + depthF*6)})`;
+      if (treeType === 0) {
+        // Pine tree — triangular with layers
+        for (let layer = 0; layer < 3; layer++) {
+          const lh = th * (0.4 + layer * 0.2);
+          const lw = (4 + layer * 2);
+          const ly = ty - th + layer * (th * 0.2);
+          ctx.beginPath();
+          ctx.moveTo(x - lw, ly + lh * 0.4); ctx.lineTo(x, ly); ctx.lineTo(x + lw, ly + lh * 0.4);
+          ctx.fill();
+        }
+        // Trunk
+        ctx.fillRect(x - 1, ty - 2, 2, 4);
+      } else if (treeType === 1) {
+        // Deciduous / maple — rounded canopy
+        ctx.beginPath();
+        ctx.arc(x, ty - th * 0.5, th * 0.4, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x - th * 0.25, ty - th * 0.35, th * 0.3, 0, Math.PI*2);
+        ctx.fill();
+        ctx.arc(x + th * 0.25, ty - th * 0.35, th * 0.3, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillRect(x - 1, ty - 3, 2, 5);
+      } else {
+        // Bamboo cluster — thin tall
+        for (let b = -1; b <= 1; b++) {
+          ctx.fillRect(x + b * 3 - 0.5, ty - th, 1, th + 2);
+          // Bamboo leaf tufts
+          ctx.beginPath();
+          ctx.ellipse(x + b * 3, ty - th - 2, 3, 1.5, b * 0.3, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+    }
+
+    // === LAKE/WATER REFLECTION between mountains and ground ===
+    const lakeY = canvas.height * 0.33;
+    const lakeH = canvas.height * 0.04;
+    // Water surface
+    const waterGr = ctx.createLinearGradient(0, lakeY, 0, lakeY + lakeH);
+    waterGr.addColorStop(0, 'rgba(40,25,15,0.4)');
+    waterGr.addColorStop(0.3, 'rgba(80,50,25,0.3)');
+    waterGr.addColorStop(0.6, 'rgba(120,70,30,0.2)');
+    waterGr.addColorStop(1, 'rgba(60,35,18,0.1)');
+    ctx.fillStyle = waterGr;
+    ctx.fillRect(0, lakeY, canvas.width, lakeH);
+    // Sunset reflection on water
+    ctx.globalAlpha = 0.08;
+    const reflGr = ctx.createRadialGradient(canvas.width * 0.45, lakeY + lakeH * 0.3, 5, canvas.width * 0.45, lakeY + lakeH * 0.3, 120);
+    reflGr.addColorStop(0, '#ffcc66');
+    reflGr.addColorStop(0.4, '#ff884422');
+    reflGr.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = reflGr;
+    ctx.fillRect(0, lakeY, canvas.width, lakeH);
+    ctx.globalAlpha = 1;
+    // Water ripple lines
+    ctx.strokeStyle = 'rgba(200,160,80,0.06)';
+    ctx.lineWidth = 0.5;
+    for (let wr = 0; wr < 5; wr++) {
+      const wry = lakeY + wr * (lakeH / 5) + 2;
+      ctx.beginPath();
+      for (let wx = 0; wx <= canvas.width; wx += 8) {
+        const wy = wry + Math.sin(wx * 0.03 + globalTime * 1.5 + wr) * 1.5;
+        wx === 0 ? ctx.moveTo(wx, wy) : ctx.lineTo(wx, wy);
+      }
+      ctx.stroke();
+    }
+
+    // Mist between trees and ground (thicker, more volumetric)
+    const mistGr = ctx.createLinearGradient(0, canvas.height * 0.32, 0, canvas.height * 0.42);
+    mistGr.addColorStop(0, 'rgba(180,140,80,0)');
+    mistGr.addColorStop(0.2, 'rgba(170,130,70,0.06)');
+    mistGr.addColorStop(0.4, 'rgba(160,120,60,0.12)');
+    mistGr.addColorStop(0.6, 'rgba(140,100,50,0.14)');
+    mistGr.addColorStop(0.8, 'rgba(120,80,40,0.06)');
+    mistGr.addColorStop(1, 'rgba(100,70,30,0)');
+    ctx.fillStyle = mistGr;
+    ctx.fillRect(0, canvas.height * 0.32, canvas.width, canvas.height * 0.1);
+    // Drifting mist patches
+    ctx.globalAlpha = 0.04;
+    for (let mi = 0; mi < 4; mi++) {
+      const mx = ((mi * 280 + globalTime * 12) % (canvas.width + 200)) - 100;
+      const my = canvas.height * 0.36 + Math.sin(mi * 3.7 + globalTime * 0.5) * 8;
+      const mist = ctx.createRadialGradient(mx, my, 10, mx, my, 60 + Math.sin(mi) * 20);
+      mist.addColorStop(0, '#ddc088');
+      mist.addColorStop(0.6, '#aa885544');
+      mist.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = mist;
+      ctx.beginPath(); ctx.ellipse(mx, my, 60, 15, 0, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Ground — golden/amber grassland (brighter)
+    const groundGrad = ctx.createLinearGradient(0, canvas.height * 0.35, 0, canvas.height);
+    groundGrad.addColorStop(0, '#5a4828');
+    groundGrad.addColorStop(0.1, '#6a5530');
+    groundGrad.addColorStop(0.3, '#5a4a28');
+    groundGrad.addColorStop(0.6, '#4a3a20');
+    groundGrad.addColorStop(1, '#3a2a18');
+    ctx.fillStyle = groundGrad;
+    ctx.fillRect(0, canvas.height * 0.35, canvas.width, canvas.height * 0.65);
+
+    // Warm terrain texture bands
+    for (let band = 0; band < 4; band++) {
+      const bY = canvas.height * 0.35 + band * canvas.height * 0.16;
+      ctx.globalAlpha = 0.03 + band * 0.008;
+      ctx.fillStyle = band % 2 === 0 ? '#5a4828' : '#221a0a';
+      ctx.fillRect(0, bY, canvas.width, canvas.height * 0.16);
+    }
+    ctx.globalAlpha = 1;
+
+    // Worn dirt path across middle
+    const pathY = canvas.height * 0.65;
+    const pathGr = ctx.createLinearGradient(0, pathY - 25, 0, pathY + 25);
+    pathGr.addColorStop(0, 'rgba(50,38,20,0)');
+    pathGr.addColorStop(0.3, 'rgba(50,38,20,0.15)');
+    pathGr.addColorStop(0.5, 'rgba(45,35,18,0.2)');
+    pathGr.addColorStop(0.7, 'rgba(50,38,20,0.15)');
+    pathGr.addColorStop(1, 'rgba(50,38,20,0)');
+    ctx.fillStyle = pathGr;
+    ctx.beginPath();
+    ctx.moveTo(0, pathY - 20);
+    for (let x = 0; x <= canvas.width; x += 30) {
+      ctx.lineTo(x, pathY - 20 + Math.sin(x * 0.008) * 8);
+    }
+    for (let x = canvas.width; x >= 0; x -= 30) {
+      ctx.lineTo(x, pathY + 20 + Math.sin(x * 0.008 + 1) * 6);
+    }
+    ctx.fill();
+
+    // Ground patches and small stones with shadows
+    for (const s of this.groundStones) {
+      const sx = s.x % canvas.width;
+      const sy = (s.y % (canvas.height * 0.6)) + canvas.height * 0.38;
+      // Soft shadow under stone
+      ctx.fillStyle = 'rgba(0,0,0,0.08)';
+      ctx.beginPath(); ctx.ellipse(sx + 1, sy + 1, s.size * 1.3, s.size * 0.6, 0, 0, Math.PI*2); ctx.fill();
+      // Dirt patch around stone
+      const patchGr = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.size * 2.5);
+      patchGr.addColorStop(0, `rgba(${55 + Math.sin(sx)*12},${45 + Math.sin(sy)*8},${28},0.18)`);
+      patchGr.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = patchGr;
+      ctx.beginPath(); ctx.arc(sx, sy, s.size * 2.5, 0, Math.PI*2); ctx.fill();
+      // Stone with highlight and shadow
+      const stoneGr = ctx.createRadialGradient(sx - s.size*0.3, sy - s.size*0.3, 0, sx, sy, s.size);
+      stoneGr.addColorStop(0, `rgba(${90+Math.sin(sx)*20},${75+Math.sin(sy)*15},${50},0.5)`);
+      stoneGr.addColorStop(0.7, s.color);
+      stoneGr.addColorStop(1, `rgba(30,25,15,0.4)`);
+      ctx.fillStyle = stoneGr;
+      ctx.beginPath(); ctx.ellipse(sx, sy, s.size, s.size * 0.65, sx * 0.01, 0, Math.PI*2); ctx.fill();
+    }
+
+    // Golden grass blades with wind and depth
+    for (const g of this.grassBlades) {
+      const gx = g.x % canvas.width;
+      const gy = (g.y % (canvas.height * 0.55)) + canvas.height * 0.4;
+      const depth = (gy - canvas.height * 0.4) / (canvas.height * 0.55); // 0=top, 1=bottom
+      const sway = Math.sin(g.phase + globalTime * 1.8) * (6 + depth * 3);
+      const windBend = Math.sin(globalTime * 0.8 + gx * 0.003) * (2 + depth * 2);
+      const windGust = Math.sin(globalTime * 2.5 + gx * 0.01) * 2;
+      const h = g.h * (0.7 + depth * 0.4);
+      // Grass gets more golden/amber near camera
+      const r = 100 + depth * 60 + Math.sin(gx * 0.04) * 25;
+      const gr = 70 + depth * 40 + Math.sin(gy * 0.03) * 15;
+      const b = 20 + Math.sin(gx * 0.06) * 10;
+      const grassGr = ctx.createLinearGradient(gx, gy, gx + sway, gy - h);
+      grassGr.addColorStop(0, `rgb(${r*0.6},${gr*0.6},${b})`);
+      grassGr.addColorStop(0.4, `rgb(${r*0.8},${gr*0.8},${b})`);
+      grassGr.addColorStop(0.8, `rgb(${r},${gr},${b})`);
+      grassGr.addColorStop(1, `rgba(${r+30},${gr+20},${b+15},0.7)`);
+      ctx.strokeStyle = grassGr;
+      ctx.lineWidth = 1 + depth * 0.8 + Math.sin(gx * 0.1) * 0.3;
+      ctx.beginPath();
+      ctx.moveTo(gx, gy);
+      ctx.bezierCurveTo(
+        gx + (sway + windGust) * 0.3 + windBend, gy - h * 0.35,
+        gx + (sway + windGust) * 0.7 + windBend, gy - h * 0.7,
+        gx + sway + windGust + windBend * 1.5, gy - h
+      );
+      ctx.stroke();
+    }
+
+    // Floating embers / pollen in golden light
+    for (const a of this.ambientParticles) {
+      ctx.globalAlpha = a.alpha * 0.35;
+      const dustGr = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, a.size * 4);
+      dustGr.addColorStop(0, '#ffcc66');
+      dustGr.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = dustGr;
+      ctx.beginPath(); ctx.arc(a.x, a.y, a.size * 4, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = a.alpha;
+      ctx.fillStyle = '#ffd880';
+      ctx.beginPath(); ctx.arc(a.x, a.y, a.size, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Dust kick-up from moving characters
+    const allChars = [this.player, ...this.enemies];
+    for (const ch of allChars) {
+      if (ch.moving || (ch.speed && ch.knockbackTimer > 0)) {
+        if (Math.random() < 0.15) {
+          this.particles.push(new Particle(
+            ch.x + (Math.random()-0.5)*16, ch.y + 25 + Math.random()*5,
+            `rgba(${120+Math.random()*40},${90+Math.random()*30},${50+Math.random()*20},0.3)`,
+            (Math.random()-0.5)*20, -8 - Math.random()*12,
+            0.4, 2 + Math.random()*2, 0
+          ));
+        }
+      }
+    }
+
+    // Particles behind characters
+    this.particles.forEach(p => p.draw(ctx));
+
+    // Sort enemies + player by Y for depth
+    const drawables = [...this.enemies, this.player].sort((a, b) => a.y - b.y);
+    for (const d of drawables) {
+      d.draw(ctx);
+      // Sunset rim lighting — warm orange on left side
+      const rimGr = ctx.createRadialGradient(d.x - 14, d.y - 22, 3, d.x - 14, d.y - 22, 45);
+      rimGr.addColorStop(0, 'rgba(255,160,60,0.12)');
+      rimGr.addColorStop(0.4, 'rgba(255,120,40,0.05)');
+      rimGr.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = rimGr;
+      ctx.beginPath(); ctx.arc(d.x - 10, d.y - 18, 45, 0, Math.PI*2); ctx.fill();
+      // Cool shadow on opposite side
+      const shadowGr = ctx.createRadialGradient(d.x + 10, d.y - 10, 3, d.x + 10, d.y - 10, 35);
+      shadowGr.addColorStop(0, 'rgba(20,15,40,0.06)');
+      shadowGr.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = shadowGr;
+      ctx.beginPath(); ctx.arc(d.x + 10, d.y - 10, 35, 0, Math.PI*2); ctx.fill();
+    }
+
+    // Floating texts
+    this.floatingTexts.forEach(t => t.draw(ctx));
+
+    // Dash cooldown bar with glass effect
+    if (this.player.dashCooldown > 0) {
+      const dbx = this.player.x - 16;
+      const dby = this.player.y + 35;
+      const dbw = 32;
+      const dbh = 5;
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.beginPath(); ctx.roundRect(dbx, dby, dbw, dbh, 2); ctx.fill();
+      const dashGr = ctx.createLinearGradient(dbx, dby, dbx, dby + dbh);
+      dashGr.addColorStop(0, '#66ccff');
+      dashGr.addColorStop(0.5, '#44aaff');
+      dashGr.addColorStop(1, '#2288dd');
+      ctx.fillStyle = dashGr;
+      const fillW = dbw * (1 - this.player.dashCooldown / 0.6);
+      if (fillW > 0) {
+        ctx.beginPath(); ctx.roundRect(dbx, dby, fillW, dbh, 2); ctx.fill();
+      }
+      // Glass shine
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      if (fillW > 0) ctx.fillRect(dbx + 1, dby, fillW - 2, dbh * 0.35);
+    }
+
+    // === GOD RAYS from sunset ===
+    const sunRayX = canvas.width * 0.45;
+    const sunRayY = canvas.height * 0.15;
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    for (let r = 0; r < 8; r++) {
+      const rayAngle = 0.6 + r * 0.22 + Math.sin(globalTime * 0.3 + r) * 0.05;
+      const rayLen = canvas.height * 1.2;
+      const rayW = 15 + Math.sin(r * 1.5 + globalTime * 0.5) * 8;
+      ctx.globalAlpha = 0.025 + Math.sin(globalTime * 0.4 + r * 0.7) * 0.01;
+      const rayGr = ctx.createLinearGradient(sunRayX, sunRayY, sunRayX + Math.cos(rayAngle) * rayLen, sunRayY + Math.sin(rayAngle) * rayLen);
+      rayGr.addColorStop(0, '#ffcc66');
+      rayGr.addColorStop(0.3, '#ff993322');
+      rayGr.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = rayGr;
+      ctx.beginPath();
+      ctx.moveTo(sunRayX, sunRayY);
+      const perpX = Math.cos(rayAngle + Math.PI/2);
+      const perpY = Math.sin(rayAngle + Math.PI/2);
+      ctx.lineTo(sunRayX + Math.cos(rayAngle) * rayLen + perpX * rayW, sunRayY + Math.sin(rayAngle) * rayLen + perpY * rayW);
+      ctx.lineTo(sunRayX + Math.cos(rayAngle) * rayLen - perpX * rayW, sunRayY + Math.sin(rayAngle) * rayLen - perpY * rayW);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // === ATMOSPHERIC FOG (depth haze near horizon) ===
+    const fogGr = ctx.createLinearGradient(0, canvas.height * 0.3, 0, canvas.height * 0.5);
+    fogGr.addColorStop(0, 'rgba(180,120,60,0.12)');
+    fogGr.addColorStop(0.5, 'rgba(140,90,40,0.06)');
+    fogGr.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = fogGr;
+    ctx.fillRect(0, canvas.height * 0.3, canvas.width, canvas.height * 0.2);
+
+    // === FALLING LEAVES / PETALS (more, with depth variation) ===
+    for (let l = 0; l < 20; l++) {
+      const speed = 12 + l * 1.8;
+      const drift = Math.sin(globalTime * 0.8 + l * 1.3) * 30;
+      const lx = ((l * 107.5 + globalTime * speed + drift) % (canvas.width + 60)) - 30;
+      const ly = ((l * 73.3 + globalTime * (10 + l * 1.5)) % (canvas.height + 60)) - 30;
+      const lRot = globalTime * (1.5 + l * 0.25) + l * 0.7;
+      const depth = (l / 20); // 0=far, 1=near
+      const lSize = 1.5 + depth * 2.5 + Math.sin(l * 2.1) * 0.8;
+      const leafAlpha = (0.2 + depth * 0.35) + Math.sin(l + globalTime) * 0.1;
+      ctx.save();
+      ctx.translate(lx, ly);
+      ctx.rotate(lRot);
+      ctx.globalAlpha = leafAlpha;
+      if (l % 4 === 0) {
+        // Cherry blossom petals (pink)
+        ctx.fillStyle = `rgb(${240 - depth*40},${100 + depth*30},${120 + depth*20})`;
+        ctx.beginPath();
+        ctx.moveTo(0, -lSize);
+        ctx.bezierCurveTo(lSize*1.2, -lSize*0.5, lSize*1.2, lSize*0.5, 0, lSize);
+        ctx.bezierCurveTo(-lSize*1.2, lSize*0.5, -lSize*1.2, -lSize*0.5, 0, -lSize);
+        ctx.fill();
+        // Petal vein
+        ctx.strokeStyle = 'rgba(200,60,80,0.3)';
+        ctx.lineWidth = 0.3;
+        ctx.beginPath(); ctx.moveTo(0, -lSize*0.8); ctx.lineTo(0, lSize*0.8); ctx.stroke();
+      } else {
+        // Golden/amber leaves
+        const lr = 160 + depth * 50 + Math.sin(l * 1.7) * 30;
+        const lg = 100 + depth * 30 + Math.sin(l * 2.3) * 20;
+        const lb = 20 + Math.sin(l * 3.1) * 15;
+        ctx.fillStyle = `rgb(${lr},${lg},${lb})`;
+        ctx.beginPath();
+        ctx.moveTo(0, -lSize);
+        ctx.quadraticCurveTo(lSize * 1.2, -lSize * 0.2, lSize * 0.3, lSize);
+        ctx.quadraticCurveTo(0, lSize * 0.6, -lSize * 0.3, lSize);
+        ctx.quadraticCurveTo(-lSize * 1.2, -lSize * 0.2, 0, -lSize);
+        ctx.fill();
+        // Leaf vein
+        ctx.strokeStyle = `rgba(${lr+30},${lg+20},${lb+10},0.3)`;
+        ctx.lineWidth = 0.3;
+        ctx.beginPath(); ctx.moveTo(0, -lSize*0.6); ctx.lineTo(0, lSize*0.7); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+
+    // === FIREFLIES / EMBERS (golden glowing dots) ===
+    for (let ff = 0; ff < 15; ff++) {
+      const ffx = ((ff * 173.7 + Math.sin(globalTime * 0.3 + ff * 2.1) * 80) % canvas.width);
+      const ffy = canvas.height * 0.4 + ((ff * 97.3 + Math.sin(globalTime * 0.5 + ff * 1.7) * 40) % (canvas.height * 0.5));
+      const ffPulse = 0.3 + Math.sin(globalTime * 2.5 + ff * 1.3) * 0.3;
+      const ffSize = 1 + Math.sin(ff * 2.7) * 0.5;
+      // Outer glow
+      ctx.globalAlpha = ffPulse * 0.15;
+      const ffGlow = ctx.createRadialGradient(ffx, ffy, 0, ffx, ffy, 12);
+      ffGlow.addColorStop(0, '#ffee88');
+      ffGlow.addColorStop(0.5, '#ffaa4444');
+      ffGlow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = ffGlow;
+      ctx.beginPath(); ctx.arc(ffx, ffy, 12, 0, Math.PI*2); ctx.fill();
+      // Core
+      ctx.globalAlpha = ffPulse;
+      ctx.fillStyle = '#ffe8a0';
+      ctx.beginPath(); ctx.arc(ffx, ffy, ffSize, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // =============== CINEMATIC POST-PROCESSING ===============
+
+    // === 1. WARM COLOR GRADING (very subtle) ===
+    ctx.globalCompositeOperation = 'screen';
+    ctx.globalAlpha = 0.015;
+    ctx.fillStyle = '#ff8844';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+
+    // === 5. HEAT SHIMMER near horizon ===
+    ctx.globalAlpha = 0.025;
+    const heatY = canvas.height * 0.34;
+    for (let hx = 0; hx < canvas.width; hx += 20) {
+      const hy = heatY + Math.sin(hx * 0.025 + globalTime * 3.5) * 3;
+      const hw = 15 + Math.sin(hx * 0.01 + globalTime) * 5;
+      ctx.fillStyle = '#ffcc88';
+      ctx.fillRect(hx, hy, hw, 1.5);
+    }
+    ctx.globalAlpha = 1;
+
+    // === 6. LIGHT CINEMATIC VIGNETTE ===
+    const vignette = ctx.createRadialGradient(
+      canvas.width/2, canvas.height/2, canvas.height * 0.3,
+      canvas.width/2, canvas.height/2, canvas.height * 0.95
+    );
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(0.6, 'rgba(0,0,0,0)');
+    vignette.addColorStop(0.8, 'rgba(0,0,0,0.08)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.2)');
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // === 8. FILM GRAIN (very subtle) ===
+    ctx.globalAlpha = 0.01;
+    for (let i = 0; i < 40; i++) {
+      const gx = Math.random() * canvas.width;
+      const gy = Math.random() * canvas.height;
+      ctx.fillStyle = Math.random() > 0.5 ? '#fff' : '#000';
+      ctx.fillRect(gx, gy, 1.5, 1.5);
+    }
+    ctx.globalAlpha = 1;
+  }
+}
+
+// ==================== GAME LOOP ====================
+function goToMenu() {
+  if (animFrame) cancelAnimationFrame(animFrame);
+  animFrame = null;
+  game = null;
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('boss-bar').style.display = 'none';
+  document.getElementById('wave-announce').style.opacity = 0;
+  document.getElementById('combo-display').style.opacity = 0;
+  document.getElementById('start-screen').style.display = 'flex';
+  titleCanvas.style.display = 'block';
+  titleActive = true;
+  titleLastTime = performance.now();
+  requestAnimationFrame(titleLoop);
+}
+
+function startGame() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('win-screen').style.display = 'none';
+  document.getElementById('lose-screen').style.display = 'none';
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('boss-bar').style.display = 'none';
+  document.getElementById('wave-announce').style.opacity = 0;
+  titleCanvas.style.display = 'none';
+  titleActive = false;
+
+  game = new Game();
+  if (animFrame) cancelAnimationFrame(animFrame);
+  let lastTime = performance.now();
+
+  function loop(now) {
+    const dt = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+    globalTime += dt;
+
+    // Screen shake
+    if (screenShake > 0) {
+      screenShake -= dt;
+      shakeX = (Math.random() - 0.5) * screenShake * 200;
+      shakeY = (Math.random() - 0.5) * screenShake * 200;
+    } else {
+      shakeX = shakeY = 0;
+    }
+
+    // Reset all canvas state before drawing
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.shadowBlur = 0;
+    ctx.save();
+    ctx.translate(shakeX, shakeY);
+
+    game.update(dt);
+    try { game.draw(); } catch(e) {
+      ctx.fillStyle = '#ff0000'; ctx.font = '20px sans-serif';
+      ctx.fillText('ERROR: ' + e.message, 20, 40);
+      console.error(e);
+    }
+
+    ctx.restore();
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+
+    if (game.state === 'win') {
+      document.getElementById('hud').style.display = 'none';
+      document.getElementById('boss-bar').style.display = 'none';
+      document.getElementById('win-screen').style.display = 'flex';
+      document.getElementById('final-score').textContent = game.score;
+      return;
+    }
+    if (game.state === 'lose') {
+      document.getElementById('hud').style.display = 'none';
+      document.getElementById('boss-bar').style.display = 'none';
+      document.getElementById('lose-screen').style.display = 'flex';
+      document.getElementById('death-wave').textContent = game.wave;
+      document.getElementById('death-score').textContent = game.score;
+      return;
+    }
+
+    animFrame = requestAnimationFrame(loop);
+  }
+  animFrame = requestAnimationFrame(loop);
+}
+
+// ==================== TITLE ANIMATION LOOP ====================
+let titleLastTime = performance.now();
+function titleLoop(now) {
+  if (!titleActive) return;
+  const dt = Math.min((now - titleLastTime) / 1000, 0.05);
+  titleLastTime = now;
+  globalTime += dt;
+  drawTitleBg(dt);
+  requestAnimationFrame(titleLoop);
+}
+requestAnimationFrame(titleLoop);
+
+// Idle background
+ctx.fillStyle = '#2a1e14';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+</script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samurai Kabuto - 3D Model</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; overflow: hidden; font-family: sans-serif; }
+  canvas { display: block; }
+  #info {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    color: #aaa; font-size: 13px; text-align: center;
+    background: rgba(0,0,0,0.5); padding: 8px 18px; border-radius: 20px;
+  }
+  #title {
+    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+    color: #c9a23c; font-size: 22px; font-weight: bold; letter-spacing: 3px;
+    text-shadow: 0 0 20px rgba(201,162,60,0.4);
+  }
+</style>
+</head>
+<body>
+<div id="title">SAMURAI KABUTO</div>
+<div id="info">Drag to rotate &bull; Scroll to zoom &bull; Right-click to pan</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script src="https://unpkg.com/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a2e);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = true;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.8;
+document.body.appendChild(renderer.domElement);
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// === MATERIALS (brighter, more visible) ===
+const ironMat = new THREE.MeshStandardMaterial({ color: 0x4a4a5e, metalness: 0.85, roughness: 0.3 });
+const goldMat = new THREE.MeshStandardMaterial({ color: 0xddb84d, metalness: 0.8, roughness: 0.2 });
+const redLacquer = new THREE.MeshStandardMaterial({ color: 0xcc2222, metalness: 0.2, roughness: 0.4 });
+const darkIron = new THREE.MeshStandardMaterial({ color: 0x353545, metalness: 0.85, roughness: 0.35 });
+const crestGold = new THREE.MeshStandardMaterial({ color: 0xe8c44a, metalness: 0.75, roughness: 0.15 });
+
+const helmet = new THREE.Group();
+
+// === HACHI (Main dome) ===
+const domeGeo = new THREE.SphereGeometry(2.2, 64, 32, 0, Math.PI * 2, 0, Math.PI * 0.55);
+const dome = new THREE.Mesh(domeGeo, ironMat);
+dome.scale.set(1, 0.85, 1.05);
+dome.position.y = 0.3;
+helmet.add(dome);
+
+// Tehen (crown knob)
+const tehen = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.25, 0.2, 16), goldMat);
+tehen.position.y = 1.85;
+helmet.add(tehen);
+
+const tehenRing = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.05, 8, 24), goldMat);
+tehenRing.position.y = 1.78;
+tehenRing.rotation.x = Math.PI / 2;
+helmet.add(tehenRing);
+
+// Rivets along dome plates
+for (let i = 0; i < 12; i++) {
+  const angle = (i / 12) * Math.PI * 2;
+  for (let r = 0; r < 4; r++) {
+    const t = 0.2 + r * 0.2;
+    const ry = 0.4 + t * 1.4;
+    const radius = 2.18 * Math.sin(Math.acos(Math.min(1, Math.abs((ry - 0.3) / (2.2 * 0.85)))));
+    if (radius > 0.3) {
+      const rivet = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), goldMat);
+      rivet.position.set(Math.sin(angle) * radius, ry, Math.cos(angle) * (radius * 1.05));
+      helmet.add(rivet);
+    }
+  }
+}
+
+// Plate ridge lines
+for (let i = 0; i < 12; i++) {
+  const angle = (i / 12) * Math.PI * 2;
+  const points = [];
+  for (let t = 0; t <= 1; t += 0.05) {
+    const ry = 0.35 + t * 1.45;
+    const r = 2.21 * Math.sin(Math.acos(Math.min(1, Math.abs((ry - 0.3) / (2.2 * 0.85)))));
+    if (r > 0.2) points.push(new THREE.Vector3(Math.sin(angle) * r, ry, Math.cos(angle) * r * 1.05));
+  }
+  if (points.length > 2) {
+    const curve = new THREE.CatmullRomCurve3(points);
+    const ridgeGeo = new THREE.TubeGeometry(curve, 16, 0.025, 4, false);
+    helmet.add(new THREE.Mesh(ridgeGeo, darkIron));
+  }
+}
+
+// === MABISASHI (Front visor) ===
+const visorShape = new THREE.Shape();
+visorShape.moveTo(-1.8, 0);
+visorShape.quadraticCurveTo(-2.0, 0.8, -0.5, 1.2);
+visorShape.quadraticCurveTo(0, 1.35, 0.5, 1.2);
+visorShape.quadraticCurveTo(2.0, 0.8, 1.8, 0);
+visorShape.quadraticCurveTo(0, 0.15, -1.8, 0);
+const visorGeo = new THREE.ExtrudeGeometry(visorShape, { depth: 0.15, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 3 });
+const visor = new THREE.Mesh(visorGeo, ironMat);
+visor.rotation.x = -Math.PI / 2 + 0.3;
+visor.position.set(0, 0.15, 2.1);
+visor.scale.set(1.05, 1, 0.7);
+helmet.add(visor);
+
+const visorTrim = new THREE.Mesh(new THREE.TorusGeometry(1.85, 0.06, 8, 32, Math.PI), goldMat);
+visorTrim.rotation.x = -0.15;
+visorTrim.rotation.z = Math.PI;
+visorTrim.position.set(0, 0.3, 2.25);
+helmet.add(visorTrim);
+
+// === SHIKORO (Neck guard - 5 layered lames) ===
+for (let i = 0; i < 5; i++) {
+  const yOff = -0.15 * i, zOff = -0.12 * i, scaleX = 1.0 + i * 0.06;
+  const lameGeo = new THREE.CylinderGeometry(2.25 * scaleX, 2.35 * scaleX, 0.12, 32, 1, true, Math.PI * 0.15, Math.PI * 0.7);
+  const lame = new THREE.Mesh(lameGeo, i % 2 === 0 ? darkIron : redLacquer);
+  lame.position.set(0, -0.1 + yOff, zOff - 0.15);
+  lame.rotation.y = Math.PI;
+  helmet.add(lame);
+
+  const edge = new THREE.Mesh(new THREE.TorusGeometry(2.3 * scaleX, 0.04, 6, 32, Math.PI * 0.7), goldMat);
+  edge.position.set(0, -0.17 + yOff, zOff - 0.15);
+  edge.rotation.x = Math.PI / 2;
+  edge.rotation.z = Math.PI + Math.PI * 0.15;
+  helmet.add(edge);
+}
+
+// === FUKIKAESHI (Side wing flaps) ===
+for (let side = -1; side <= 1; side += 2) {
+  const fkShape = new THREE.Shape();
+  fkShape.moveTo(0, 0); fkShape.lineTo(0.8, 0); fkShape.lineTo(0.9, 0.6);
+  fkShape.lineTo(0.3, 0.9); fkShape.lineTo(0, 0.7); fkShape.closePath();
+  const fk = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(fkShape, { depth: 0.08, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02 }),
+    redLacquer
+  );
+  fk.position.set(side * 1.9, -0.1, 0.8);
+  fk.rotation.y = side * -0.6;
+  fk.rotation.z = side * 0.2;
+  helmet.add(fk);
+
+  const mon = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.04, 8, 16), goldMat);
+  mon.position.set(side * 2.2, 0.25, 1.05);
+  mon.rotation.y = side * -0.6;
+  helmet.add(mon);
+  const monC = new THREE.Mesh(new THREE.CircleGeometry(0.15, 16), goldMat);
+  monC.position.set(side * 2.21, 0.25, 1.06);
+  monC.rotation.y = side * -0.6;
+  helmet.add(monC);
+}
+
+// === MAEDATE (Crescent moon crest) ===
+const crescentShape = new THREE.Shape();
+const outerR = 1.4, innerR = 1.1, arcSpread = 0.75;
+for (let a = -arcSpread; a <= arcSpread; a += 0.05) {
+  const x = Math.sin(a) * outerR, y = Math.cos(a) * outerR;
+  if (a === -arcSpread) crescentShape.moveTo(x, y); else crescentShape.lineTo(x, y);
+}
+for (let a = arcSpread; a >= -arcSpread; a -= 0.05) {
+  crescentShape.lineTo(Math.sin(a) * innerR, Math.cos(a) * innerR + 0.15);
+}
+crescentShape.closePath();
+const crescent = new THREE.Mesh(
+  new THREE.ExtrudeGeometry(crescentShape, { depth: 0.08, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 3 }),
+  crestGold
+);
+crescent.position.set(0, 1.75, 1.3);
+crescent.rotation.x = -0.1;
+crescent.scale.set(1.2, 1.2, 1.2);
+helmet.add(crescent);
+
+const mountPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 0.15, 8), goldMat);
+mountPlate.position.set(0, 1.7, 1.55);
+mountPlate.rotation.x = 0.3;
+helmet.add(mountPlate);
+
+// === MENPO (Face guard) ===
+const menpoShape = new THREE.Shape();
+menpoShape.moveTo(-1.5, 0);
+menpoShape.quadraticCurveTo(-1.6, -0.4, -1.3, -0.8);
+menpoShape.quadraticCurveTo(-0.8, -1.4, 0, -1.5);
+menpoShape.quadraticCurveTo(0.8, -1.4, 1.3, -0.8);
+menpoShape.quadraticCurveTo(1.6, -0.4, 1.5, 0);
+menpoShape.lineTo(-1.5, 0);
+const menpoGeo = new THREE.ExtrudeGeometry(menpoShape, {
+  depth: 1.6, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 3,
+  extrudePath: new THREE.QuadraticBezierCurve3(
+    new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0.8), new THREE.Vector3(0, 0.2, 1.6)
+  )
+});
+const menpo = new THREE.Mesh(menpoGeo, ironMat);
+menpo.position.set(0, -0.2, 0.6);
+menpo.rotation.x = 0.15;
+menpo.scale.set(1, 0.7, 1);
+helmet.add(menpo);
+
+// Nose ridge
+const nose = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.15, 0.8), darkIron);
+nose.position.set(0, -0.55, 1.9);
+helmet.add(nose);
+
+// Moustache bars
+for (let i = 0; i < 3; i++) {
+  const bar = new THREE.Mesh(new THREE.BoxGeometry(1.8 - i * 0.3, 0.06, 0.12), darkIron);
+  bar.position.set(0, -1.05 - i * 0.12, 1.55);
+  helmet.add(bar);
+}
+
+// Throat guard
+for (let i = 0; i < 3; i++) {
+  const tGeo = new THREE.CylinderGeometry(1.2 + i * 0.1, 1.3 + i * 0.1, 0.1, 16, 1, true, Math.PI * 0.3, Math.PI * 0.4);
+  const tLame = new THREE.Mesh(tGeo, i % 2 === 0 ? darkIron : redLacquer);
+  tLame.position.set(0, -1.4 - i * 0.12, 1.0);
+  tLame.rotation.y = Math.PI;
+  helmet.add(tLame);
+}
+
+// === KUWAGATA (Horn prongs) ===
+for (let side = -1; side <= 1; side += 2) {
+  const hornCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 0, 0), new THREE.Vector3(side * 0.3, 0.5, 0),
+    new THREE.Vector3(side * 0.5, 1.2, -0.1), new THREE.Vector3(side * 0.4, 1.8, -0.2)
+  ]);
+  const horn = new THREE.Mesh(new THREE.TubeGeometry(hornCurve, 20, 0.08, 8, false), crestGold);
+  horn.position.set(side * 0.6, 1.6, 1.4);
+  helmet.add(horn);
+  const hBase = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.1, 8), goldMat);
+  hBase.position.set(side * 0.6, 1.6, 1.4);
+  helmet.add(hBase);
+}
+
+// === GROUND PLATFORM ===
+const platform = new THREE.Mesh(
+  new THREE.CylinderGeometry(3.5, 3.8, 0.3, 32),
+  new THREE.MeshStandardMaterial({ color: 0x222233, metalness: 0.7, roughness: 0.3 })
+);
+platform.position.y = -2.0;
+platform.receiveShadow = true;
+scene.add(platform);
+
+const pRing = new THREE.Mesh(new THREE.TorusGeometry(3.65, 0.05, 8, 48), goldMat);
+pRing.rotation.x = Math.PI / 2;
+pRing.position.y = -1.85;
+scene.add(pRing);
+
+helmet.rotation.x = 0.1;
+helmet.position.y = 0.3;
+scene.add(helmet);
+
+// === LIGHTING (much brighter) ===
+const keyLight = new THREE.DirectionalLight(0xfff5e6, 3.0);
+keyLight.position.set(5, 8, 5);
+keyLight.castShadow = true;
+scene.add(keyLight);
+
+const fillLight = new THREE.DirectionalLight(0x6688cc, 1.5);
+fillLight.position.set(-4, 3, -2);
+scene.add(fillLight);
+
+const rimLight = new THREE.DirectionalLight(0xff8844, 2.0);
+rimLight.position.set(0, 2, -5);
+scene.add(rimLight);
+
+const frontLight = new THREE.DirectionalLight(0xffffff, 1.5);
+frontLight.position.set(0, 3, 8);
+scene.add(frontLight);
+
+scene.add(new THREE.AmbientLight(0x555566, 1.0));
+
+const underGlow = new THREE.PointLight(0xff6644, 1.0, 8);
+underGlow.position.set(0, -0.5, 2);
+scene.add(underGlow);
+
+// === CAMERA & CONTROLS ===
+camera.position.set(0, 2, 7);
+camera.lookAt(0, 0.5, 0);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.target.set(0, 0.5, 0);
+controls.minDistance = 4;
+controls.maxDistance = 15;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 1.5;
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>
