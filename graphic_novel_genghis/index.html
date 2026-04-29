@@ -11,129 +11,112 @@
       background: #050a14;
       color: #fff;
       font-family: 'Segoe UI', system-ui, sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .header {
-      text-align: center;
-      padding: 2rem 1rem 1rem;
-      background: linear-gradient(180deg, #0f1d36 0%, #050a14 100%);
-      border-bottom: 2px solid #1a2a4a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.4rem 1rem;
+      background: #0a1426;
+      border-bottom: 1px solid #1a2a4a;
+      flex-shrink: 0;
     }
 
     .header h1 {
-      font-size: 1.8rem;
-      letter-spacing: 2px;
+      font-size: 0.95rem;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
       background: linear-gradient(90deg, #5b9bd5, #c0392b, #5b9bd5);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-    }
-
-    .header p {
-      color: #777;
-      margin-top: 0.4rem;
-      font-size: 0.9rem;
+      margin: 0;
     }
 
     .back-link {
-      display: inline-block;
-      margin-bottom: 0.8rem;
       color: #5b9bd5;
       text-decoration: none;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       letter-spacing: 1px;
-      opacity: 0.7;
-      transition: opacity 0.2s ease;
+      opacity: 0.75;
     }
     .back-link:hover { opacity: 1; }
 
-    .header .issue-badge {
-      display: inline-block;
-      margin-top: 0.5rem;
-      padding: 0.2rem 0.8rem;
-      background: rgba(91, 155, 213, 0.15);
-      border: 1px solid #c0392b;
-      border-radius: 20px;
+    .page-label-top {
       font-size: 0.75rem;
-      color: #5b9bd5;
-      letter-spacing: 2px;
+      color: #666;
       text-transform: uppercase;
+      letter-spacing: 2px;
     }
 
     .reader {
+      flex: 1;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 1.5rem;
-      position: relative;
-      min-height: calc(100vh - 200px);
+      padding: 0.5rem;
+      min-height: 0;
+      overflow: hidden;
     }
 
     .page-container {
-      position: relative;
-      max-width: 900px;
-      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .page {
       display: none;
-      width: 100%;
+      height: 100%;
       animation: fadeIn 0.4s ease;
     }
 
     .page.active {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .page img {
-      width: 100%;
-      border-radius: 6px;
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8), 0 0 80px rgba(91, 155, 213, 0.2);
+      max-height: 100%;
+      max-width: 100%;
+      height: auto;
+      width: auto;
+      border-radius: 4px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.8);
       cursor: pointer;
-      transition: transform 0.3s ease;
-    }
-
-    .page img:hover {
-      transform: scale(1.01);
-    }
-
-    .page-label {
-      text-align: center;
-      margin-top: 1rem;
-      font-size: 0.85rem;
-      color: #555;
-      text-transform: uppercase;
-      letter-spacing: 3px;
+      object-fit: contain;
     }
 
     .controls {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 1.5rem;
-      padding: 1.5rem;
-      background: linear-gradient(0deg, #0f1d36 0%, #050a14 100%);
+      gap: 1rem;
+      padding: 0.4rem 1rem;
+      background: #0a1426;
       border-top: 1px solid #1a2a4a;
-      position: sticky;
-      bottom: 0;
+      flex-shrink: 0;
     }
 
     .btn {
       background: #0f1d36;
       border: 1px solid #1f3560;
       color: #bbb;
-      padding: 0.7rem 1.8rem;
-      border-radius: 8px;
+      padding: 0.35rem 1rem;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
     .btn:hover:not(:disabled) {
@@ -158,8 +141,8 @@
     }
 
     .dot {
-      width: 10px;
-      height: 10px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #1a2a4a;
       cursor: pointer;
@@ -177,48 +160,11 @@
     }
 
     .page-num {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       color: #777;
-      min-width: 80px;
+      min-width: 60px;
       text-align: center;
       font-variant-numeric: tabular-nums;
-    }
-
-    .thumbnails {
-      display: flex;
-      gap: 0.75rem;
-      justify-content: center;
-      padding: 1rem;
-      overflow-x: auto;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .thumb {
-      width: 100px;
-      min-width: 100px;
-      border-radius: 4px;
-      overflow: hidden;
-      cursor: pointer;
-      border: 2px solid transparent;
-      opacity: 0.4;
-      transition: all 0.3s ease;
-    }
-
-    .thumb.active {
-      border-color: #c0392b;
-      opacity: 1;
-      box-shadow: 0 0 12px rgba(192, 57, 43, 0.4);
-    }
-
-    .thumb:hover:not(.active) {
-      opacity: 0.7;
-      border-color: #2a4070;
-    }
-
-    .thumb img {
-      width: 100%;
-      display: block;
     }
 
     .fullscreen-overlay {
@@ -261,22 +207,18 @@
     }
 
     @media (max-width: 600px) {
-      .header h1 { font-size: 1.2rem; }
-      .btn { padding: 0.6rem 1rem; font-size: 0.85rem; }
-      .thumb { width: 70px; min-width: 70px; }
-      .controls { gap: 0.75rem; }
+      .header h1 { font-size: 0.8rem; }
+      .btn { padding: 0.3rem 0.7rem; font-size: 0.75rem; }
+      .controls { gap: 0.5rem; }
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <a href="../index.html" class="back-link">&larr; All Issues</a>
+    <a href="../index.html" class="back-link">&larr; Back</a>
     <h1>Genghis Khan: The Blue Wolf</h1>
-    <p>A complete graphic novel &mdash; in three acts</p>
-    <span class="issue-badge">29 Pages</span>
+    <span class="page-label-top" id="pageLabelTop"></span>
   </div>
-
-  <div class="thumbnails" id="thumbnails"></div>
 
   <div class="reader">
     <div class="page-container" id="pageContainer"></div>
@@ -301,7 +243,6 @@
   <script>
     const pages = [
       { src: 'cover.png', label: 'Cover' },
-      { src: 'page0.png', label: 'Title' },
       { src: 'page1.png', label: 'Page 1 — The Frozen River' },
       { src: 'page2.png', label: 'Page 2 — The Betrothal' },
       { src: 'page3.png', label: 'Page 3 — The Poisoning' },
@@ -336,23 +277,13 @@
 
     function init() {
       const container = document.getElementById('pageContainer');
-      const thumbs = document.getElementById('thumbnails');
       const dots = document.getElementById('dots');
 
       pages.forEach((p, i) => {
         const div = document.createElement('div');
         div.className = 'page' + (i === 0 ? ' active' : '');
-        div.innerHTML = `
-          <img src="${p.src}" alt="${p.label}" onclick="openFullscreen('${p.src}')" />
-          <div class="page-label">${p.label}</div>
-        `;
+        div.innerHTML = `<img src="${p.src}" alt="${p.label}" onclick="openFullscreen('${p.src}')" />`;
         container.appendChild(div);
-
-        const thumb = document.createElement('div');
-        thumb.className = 'thumb' + (i === 0 ? ' active' : '');
-        thumb.innerHTML = `<img src="${p.src}" alt="${p.label}">`;
-        thumb.onclick = () => goTo(i);
-        thumbs.appendChild(thumb);
 
         const dot = document.createElement('div');
         dot.className = 'dot' + (i === 0 ? ' active' : '');
@@ -377,9 +308,6 @@
       document.querySelectorAll('.page').forEach((p, i) => {
         p.classList.toggle('active', i === current);
       });
-      document.querySelectorAll('.thumb').forEach((t, i) => {
-        t.classList.toggle('active', i === current);
-      });
       document.querySelectorAll('.dot').forEach((d, i) => {
         d.classList.toggle('active', i === current);
       });
@@ -387,9 +315,7 @@
       document.getElementById('nextBtn').disabled = current === pages.length - 1;
       document.getElementById('pageNum').textContent =
         `${current + 1} / ${pages.length}`;
-
-      const activeTh = document.querySelectorAll('.thumb')[current];
-      if (activeTh) activeTh.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      document.getElementById('pageLabelTop').textContent = pages[current].label;
     }
 
     function openFullscreen(src) {
