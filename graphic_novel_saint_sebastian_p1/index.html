@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saint Sebastian: The Officer Who Walked Back — A Biographical Graphic Novel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d0606;
+      color: #fff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.4rem 1rem;
+      background: #160a0a;
+      border-bottom: 1px solid #3a1818;
+      flex-shrink: 0;
+    }
+
+    .header h1 {
+      font-size: 0.95rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #d4a72c, #8b1d2c, #d4a72c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0;
+    }
+
+    .back-link {
+      color: #d4a72c;
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      opacity: 0.75;
+    }
+    .back-link:hover { opacity: 1; }
+
+    .page-label-top {
+      font-size: 0.75rem;
+      color: #6a4848;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .reader {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .page-container {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page {
+      display: none;
+      height: 100%;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .page.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page img {
+      max-height: 100%;
+      max-width: 100%;
+      height: auto;
+      width: auto;
+      border-radius: 4px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.85);
+      cursor: pointer;
+      object-fit: contain;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 0.4rem 1rem;
+      background: #160a0a;
+      border-top: 1px solid #3a1818;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      background: #1f0d0d;
+      border: 1px solid #3a1818;
+      color: #c9b58c;
+      padding: 0.35rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #2c1414;
+      border-color: #d4a72c;
+      color: #fff;
+    }
+
+    .btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .btn-arrow {
+      font-size: 1.2rem;
+    }
+
+    .page-indicator {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #3a1818;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dot.active {
+      background: #d4a72c;
+      box-shadow: 0 0 8px rgba(212, 167, 44, 0.7);
+      transform: scale(1.2);
+    }
+
+    .dot:hover:not(.active) {
+      background: #5a2424;
+    }
+
+    .page-num {
+      font-size: 0.8rem;
+      color: #8a6868;
+      min-width: 60px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .fullscreen-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.97);
+      z-index: 100;
+      cursor: zoom-out;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .fullscreen-overlay.active {
+      display: flex;
+    }
+
+    .fullscreen-overlay img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    .fullscreen-hint {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #6a4848;
+      font-size: 0.8rem;
+      z-index: 101;
+      pointer-events: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      .header h1 { font-size: 0.8rem; }
+      .btn { padding: 0.3rem 0.7rem; font-size: 0.75rem; }
+      .controls { gap: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="../index.html" class="back-link">&larr; Back</a>
+    <h1>Saint Sebastian &mdash; The Officer Who Walked Back</h1>
+    <span class="page-label-top" id="pageLabelTop"></span>
+  </div>
+
+  <div class="reader">
+    <div class="page-container" id="pageContainer"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="prevBtn" onclick="navigate(-1)">
+      <span class="btn-arrow">&larr;</span> Prev
+    </button>
+    <div class="page-indicator" id="dots"></div>
+    <span class="page-num" id="pageNum"></span>
+    <button class="btn" id="nextBtn" onclick="navigate(1)">
+      Next <span class="btn-arrow">&rarr;</span>
+    </button>
+  </div>
+
+  <div class="fullscreen-overlay" id="fullscreen" onclick="closeFullscreen()">
+    <img id="fullscreenImg" src="" alt="">
+    <div class="fullscreen-hint">Click anywhere to close</div>
+  </div>
+
+  <script>
+    const pages = [
+      { src: 'cover.png',  label: 'Cover' },
+      { src: 'page1.png',  label: 'Page 1 — Rome, c.286 AD' },
+      { src: 'page2.png',  label: 'Page 2 — Captain of the Guard' },
+      { src: 'page3.png',  label: 'Page 3 — The Prisoner’s Cell' },
+      { src: 'page4.png',  label: 'Page 4 — Chromatius' },
+      { src: 'page5.png',  label: 'Page 5 — The Household Turns' },
+      { src: 'page6.png',  label: 'Page 6 — The Denouncement' },
+      { src: 'page7.png',  label: 'Page 7 — Brought Before the Emperor' },
+      { src: 'page8.png',  label: 'Page 8 — The Post' },
+      { src: 'page9.png',  label: 'Page 9 — Pierced' },
+      { src: 'page10.png', label: 'Page 10 — The Widow’s Lamp' },
+      { src: 'page11.png', label: 'Page 11 — The Healing' },
+      { src: 'page12.png', label: 'Page 12 — The Staircase' },
+      { src: 'page13.png', label: 'Page 13 — Face to Face' },
+      { src: 'page14.png', label: 'Page 14 — The Cudgels' },
+      { src: 'page15.png', label: 'Page 15 — The Name in the Calendar' },
+    ];
+
+    let current = 0;
+
+    function init() {
+      const container = document.getElementById('pageContainer');
+      const dots = document.getElementById('dots');
+
+      pages.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'page' + (i === 0 ? ' active' : '');
+        div.innerHTML = `<img src="${p.src}" alt="${p.label}" onclick="openFullscreen('${p.src}')" />`;
+        container.appendChild(div);
+
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.onclick = () => goTo(i);
+        dots.appendChild(dot);
+      });
+
+      updateUI();
+    }
+
+    function goTo(index) {
+      if (index < 0 || index >= pages.length) return;
+      current = index;
+      updateUI();
+    }
+
+    function navigate(dir) {
+      goTo(current + dir);
+    }
+
+    function updateUI() {
+      document.querySelectorAll('.page').forEach((p, i) => {
+        p.classList.toggle('active', i === current);
+      });
+      document.querySelectorAll('.dot').forEach((d, i) => {
+        d.classList.toggle('active', i === current);
+      });
+      document.getElementById('prevBtn').disabled = current === 0;
+      document.getElementById('nextBtn').disabled = current === pages.length - 1;
+      document.getElementById('pageNum').textContent =
+        `${current + 1} / ${pages.length}`;
+      document.getElementById('pageLabelTop').textContent = pages[current].label;
+    }
+
+    function openFullscreen(src) {
+      const overlay = document.getElementById('fullscreen');
+      document.getElementById('fullscreenImg').src = src;
+      overlay.classList.add('active');
+    }
+
+    function closeFullscreen() {
+      document.getElementById('fullscreen').classList.remove('active');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') navigate(-1);
+      if (e.key === 'ArrowRight') navigate(1);
+      if (e.key === 'Escape') closeFullscreen();
+    });
+
+    init();
+  </script>
+</body>
+</html>
